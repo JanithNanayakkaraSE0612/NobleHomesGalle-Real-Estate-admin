@@ -1,0 +1,2 @@
+# NobleHomesGalle-Real-Estate-admin
+ The NobleHomes Galle Real Estate website is a responsive and SEO-optimized platform designed to showcase properties, featuring both client and admin panels. Developed using React and Tailwind CSS, the frontend ensures a smooth user experience and modern design. The project also incorporates Vite for enhanced performance and MUI components for UI consistency. The backend leverages Node.js, Express, and MongoDB to handle data management efficiently, providing seamless property listings and user interactions.
