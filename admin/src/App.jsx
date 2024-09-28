@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Dashboard, Auth } from "@/layouts";
 import NewAdmin from "@/Pages/admin/NewAdmin.jsx";
 
+
 function App() {
   return (
     <Routes>
