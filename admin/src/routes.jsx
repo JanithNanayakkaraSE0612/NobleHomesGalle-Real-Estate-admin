@@ -7,8 +7,9 @@ import {
   RectangleStackIcon,
   ChatBubbleBottomCenterIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
-import { SignIn, SignUp } from "@/pages/auth";
+import { Home, Profile, Tables, Notifications, Agent, AgentDetails } from "@/Pages/dashboard";
+import { SignIn, SignUp } from "@/Pages/auth";
+import NewAgent from "./Pages/dashboard/NewAgent";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -39,8 +40,8 @@ export const routes = [
       {
         icon: <InformationCircleIcon {...icon} />,
         name: "Agents",
-        path: "/notifications",
-        element: <Notifications />,
+        path: "/agent",
+        element: <Agent />,
       },
       {
         icon: <ChatBubbleBottomCenterIcon {...icon} />,
@@ -48,6 +49,7 @@ export const routes = [
         path: "/notifications",
         element: <Notifications />,
       },
+      
     ],
   },
   {
@@ -65,6 +67,22 @@ export const routes = [
         name: "sign up",
         path: "/sign-up",
         element: <SignUp />,
+      },
+    ],
+  },
+
+  {
+    layout: "dashboard", 
+    pages: [
+      {
+        name: "Agent Details",
+        path: "/agentDetails", 
+        element: <AgentDetails />,
+      },
+      {
+        name: "New Agent",
+        path: "/newAgent", 
+        element: <NewAgent />,
       },
     ],
   },
