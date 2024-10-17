@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaBars, FaBell, FaSearch, FaUser } from "react-icons/fa";
 import { FiBell } from "react-icons/fi";
-import profile from "../../Admin/assets/profile.png";
+import profile from "../assets/profile.png";
 import { IoIosArrowDown } from "react-icons/io";
 
 const Navbar = ({sidebarToggle, setSidebarToggle}) => {

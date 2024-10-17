@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import Sidebar from '../Components/Sidebar'
-import Dashboard from '../Components/Dashboard'
-import MainContent from '../Components/MainContent';
+import Sidebar from '../../Components/Sidebar'
+import Dashboard from '../../Components/Dashboard'
+import MainContent from '../../Components/MainContent';
 
 const AdminPannal = () => {
 

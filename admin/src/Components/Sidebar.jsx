@@ -20,8 +20,8 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
   return (
     <div className={`${sidebarToggle ? "hidden" : "block"} w-64 bg-gray-100 fixed h-full px-4 py-2`}>
       <div className="my-2 mb-4">
-        <h1 className="text-2xl text-black text-center bg-[#EBF5F5] font-bold">Homescape</h1>
-        <h1 className="text-2xl text-black text-center bg-[#EBF5F5] font-bold">Haven</h1>
+        <h1 className="text-2xl text-black text-center bg-[#EBF5F5] font-bold">NobleHome</h1>
+        <h1 className="text-2xl text-black text-center bg-[#EBF5F5] font-bold">Real-Estate</h1>
       </div>
 
       <hr />

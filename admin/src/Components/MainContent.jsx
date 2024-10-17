@@ -1,6 +1,6 @@
 
 import React from "react";
-import Overview from "../Pages/Overview";
+import Overview from "../Pages/dashboard/Overview";
 
 const MainContent = ({ selectedPage }) => {
   const renderContent = () => {

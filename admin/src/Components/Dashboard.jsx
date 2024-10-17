@@ -1,8 +1,8 @@
 // Dashboard.js
 import React, { useState } from "react";
-import Navbar from "../../Admin/Components/Navbar";
-import MainContent from "./MainContent";
-import Sidebar from "../../Admin/Components/Sidebar"; // Ensure Sidebar is properly imported
+import Navbar from "../Components/Navbar";
+import MainContent from "../Components/MainContent";
+import Sidebar from "../Components/Sidebar"; // Ensure Sidebar is properly imported
 
 const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
   // State to track the currently selected page
