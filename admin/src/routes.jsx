@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Agent, AgentDetails } from "@/Pages/dashboard";
 import { SignIn, SignUp } from "@/Pages/auth";
-import NewAgent from "./Pages/dashboard/NewAgent";
+import NewAgent from "../../admin/src/Pages/dashboard/NewAgent";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
