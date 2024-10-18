@@ -49,6 +49,12 @@ export const routes = [
         path: "/notifications",
         element: <Notifications />,
       },
+      {
+        icon: <ChatBubbleBottomCenterIcon {...icon} />,
+        name: "Setting",
+        path: "/setting",
+        element: <Notifications />,
+      },
       
     ],
   },
