@@ -1,13 +1,11 @@
 import {
   HomeIcon,
   UserCircleIcon,
-  TableCellsIcon,
   InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
-  ChatBubbleBottomCenterIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, Agent, AgentDetails } from "@/Pages/dashboard";
+import { Home, Profile, Agent, AgentDetails } from "@/Pages/dashboard";
 import { SignIn, SignUp } from "@/Pages/auth";
 import NewAgent from "./Pages/dashboard/NewAgent";
 
@@ -32,30 +30,11 @@ export const routes = [
         element: <Profile />,
       },
       {
-        icon: <TableCellsIcon {...icon} />,
-        name: "Customer",
-        path: "/tables",
-        element: <Tables />,
-      },
-      {
         icon: <InformationCircleIcon {...icon} />,
         name: "Agents",
         path: "/agent",
         element: <Agent />,
       },
-      {
-        icon: <ChatBubbleBottomCenterIcon {...icon} />,
-        name: "Messages",
-        path: "/notifications",
-        element: <Notifications />,
-      },
-      {
-        icon: <ChatBubbleBottomCenterIcon {...icon} />,
-        name: "Setting",
-        path: "/setting",
-        element: <Notifications />,
-      },
-      
     ],
   },
   {
