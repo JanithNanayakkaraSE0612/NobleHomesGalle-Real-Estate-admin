@@ -1,6 +1,7 @@
-
 import React from "react";
 import Overview from "../Pages/dashboard/Overview";
+import HouseProperty from "@/Pages/property/HouseProperty"; // Renamed to follow React naming convention
+import CustomerDetailsOverview from "../Pages/Customer/customerOverview";
 
 const MainContent = ({ selectedPage }) => {
   const renderContent = () => {
@@ -8,9 +9,9 @@ const MainContent = ({ selectedPage }) => {
       case "Overview":
         return <Overview />;
       case "Property":
-        return <div>Property Content</div>;
+        return <HouseProperty />; // Updated to use the correct component
       case "Customers":
-        return <div>Customers Content</div>;
+        return <CustomerDetailsOverview/>;
       case "Agents":
         return <div>Agents Content</div>;
       case "Messages":
