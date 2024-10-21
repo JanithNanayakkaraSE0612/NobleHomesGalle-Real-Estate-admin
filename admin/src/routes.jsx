@@ -28,6 +28,20 @@ export const routes = [
         name: "Property",
         path: "/profile",
         element: <Profile />,
+        subPages: [
+          {
+            icon: <RectangleStackIcon {...icon} />,
+            name: "House Property",
+            path: "/property/house",
+            element: <HouseProperty />, 
+          },
+          {
+            icon: <RectangleStackIcon {...icon} />,
+            name: "Land Property",
+            path: "/property/land",
+            element: <LandProperty />, 
+          },
+        ],
       },
       {
         icon: <InformationCircleIcon {...icon} />,
@@ -57,16 +71,16 @@ export const routes = [
   },
 
   {
-    layout: "dashboard", 
+    layout: "dashboard",
     pages: [
       {
         name: "Agent Details",
-        path: "/agentDetails", 
+        path: "/agentDetails",
         element: <AgentDetails />,
       },
       {
         name: "New Agent",
-        path: "/newAgent", 
+        path: "/newAgent",
         element: <NewAgent />,
       },
     ],
