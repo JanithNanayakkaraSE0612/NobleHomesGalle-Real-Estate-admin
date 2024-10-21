@@ -1,15 +1,15 @@
-import { ChevronLeftIcon } from "@heroicons/react/16/solid/index.js";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import { FaEdit } from "react-icons/fa";
-import React, {useEffect, useState} from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ImgUploader from '../../assets/IMGUploader.png';
+import ImgUploader from '../../assets/profile.png'; 
 
-const houseproperty = () => {
+const HouseProperty = () => {
     const navigate = useNavigate();
     const [fullScreenImage, setFullScreenImage] = useState("");
     const [images, setImages] = useState(Array(6).fill(""));
     const [video, setVideo] = useState(null);
-
+    
     const [formData, setFormData] = useState({
         city: "",
         title: "",
@@ -19,8 +19,12 @@ const houseproperty = () => {
         sizeType: "",
         sizeCount: "",
         agent: "",
-        map:'',
+        map: "",
         description: "",
+        bedrooms: "",
+        bathrooms: "",
+        parking: "",
+        squareFeet: "",
     });
 
     const handleBackClick = () => {
@@ -33,10 +37,8 @@ const houseproperty = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFullScreenImage(reader.result);
-
-                // Also set the first image (image1) in the grid to this image
                 const updatedImages = [...images];
-                updatedImages[0] = reader.result; // Set image1 to the uploaded full screen image
+                updatedImages[0] = reader.result;
                 setImages(updatedImages);
             };
             reader.readAsDataURL(file);
@@ -64,11 +66,44 @@ const houseproperty = () => {
         });
     };
 
+    const handleSave = () => {
+        console.log("Saving data:", formData);
+        alert("Data saved!");
+    };
 
+    const handleEdit = () => {
+        console.log("Editing data:", formData);
+        alert("Edit mode enabled!");
+    };
+
+    const handleDelete = () => {
+        console.log("Deleting data:", formData);
+        if (window.confirm("Are you sure you want to delete this property?")) {
+            alert("Data deleted!");
+            setFormData({
+                city: "",
+                title: "",
+                titleDescription: "",
+                address: "",
+                price: "",
+                sizeType: "",
+                sizeCount: "",
+                agent: "",
+                map: "",
+                description: "",
+                bedrooms: "",
+                bathrooms: "",
+                parking: "",
+                squareFeet: "",
+            });
+            setImages(Array(6).fill(""));
+            setFullScreenImage("");
+            setVideo(null);
+        }
+    };
 
     return (
-        <div className="p-4 bg-white min-h-screen">
-            {/* Header with back button */}
+        <div className="flex flex-col min-h-screen bg-white p-4">
             <div className="flex flex-col sm:flex-row justify-between mb-6 items-center">
                 <div className="flex gap-1 sm:gap-1 items-center mb-4 sm:mb-0">
                     <ChevronLeftIcon
@@ -76,12 +111,11 @@ const houseproperty = () => {
                         style={{ width: "50px", height: "50px" }}
                         onClick={handleBackClick}
                     />
-                    <h1 className="text-2xl sm:text-3xl font-bold text-black"> New Land</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-black">New House</h1>
                 </div>
             </div>
 
-            {/* Full Screen Image */}
-            <div className="relative w-full h-screen mb-6 bg-gray-200 flex items-center justify-center">
+            <div className="relative w-full h-80 mb-6 bg-gray-200 flex items-center justify-center">
                 {fullScreenImage ? (
                     <img src={fullScreenImage} alt="Full Screen" className="w-full h-full object-cover" />
                 ) : (
@@ -92,48 +126,41 @@ const houseproperty = () => {
                             onChange={handleFullScreenImageChange}
                         />
                         <img src={ImgUploader} alt="Uploader" className="w-full h-full object-cover" />
-                        <FaEdit
-                            className="absolute top-2 right-2 text-black cursor-pointer w-6 h-6"
-                            onClick={() => document.querySelector(#file-input-0).click()}
-                        />
                     </label>
                 )}
             </div>
 
-            {/* Image Uploaders Grid */}
             <div className="grid grid-cols-6 gap-4 mt-12">
                 {images.map((image, index) => (
                     <div key={index} className="relative bg-[#d9d9d9] h-40 flex items-center justify-center">
                         {image ? (
-                            <img src={image} alt={Uploaded ${index}} className="w-full h-full object-cover" />
+                            <img src={image} alt={`Uploaded ${index}`} className="w-full h-full object-cover" />
                         ) : (
                             <label className="cursor-pointer text-black">
                                 <input
                                     type="file"
                                     className="hidden"
                                     onChange={(event) => handleImageChange(index, event)}
-                                    id={file-input-${index}} // Assign a unique ID to each file input
+                                    id={`file-input-${index}`}
                                 />
                                 <img src={ImgUploader} alt="Uploader" className="w-full h-full object-cover" />
                             </label>
                         )}
-
-                        {/* Hide the edit icon for image1 (index 0) */}
                         {index !== 0 && (
                             <FaEdit
                                 className="absolute top-2 right-2 text-black cursor-pointer w-6 h-6"
-                                onClick={() => document.querySelector(#file-input-${index}).click()}
+                                onClick={() => document.querySelector(`#file-input-${index}`).click()}
                             />
                         )}
                     </div>
                 ))}
             </div>
 
-            {/* Form for Additional Information */}
+            <div className="flex-grow" />
+
             <div className="mt-16">
-                {/* Video Uploader */}
-                <div className="mb-6 flex">
-                    <label className="block text-black font-bold mb-2 w-1/6">Upload Video</label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Upload Video</label>
                     <input
                         type="file"
                         accept="video/*"
@@ -142,9 +169,8 @@ const houseproperty = () => {
                     />
                 </div>
 
-                {/* City */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">City</label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">City</label>
                     <select
                         name="city"
                         value={formData.city}
@@ -157,148 +183,146 @@ const houseproperty = () => {
                     </select>
                 </div>
 
-
-                {/* Title */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">Title</label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Title</label>
                     <input
                         type="text"
                         name="title"
-                        placeholder={'Text Here...'}
+                        placeholder="Text Here..."
                         value={formData.title}
                         onChange={handleFormChange}
                         className="w-full p-2 border rounded bg-[#D9D9D9]"
                     />
                 </div>
 
-
-                {/* Title Description */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">Title Description</label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Title Description</label>
                     <textarea
                         name="titleDescription"
                         rows={5}
-                        placeholder={'Text Here...'}
+                        placeholder="Text Here..."
                         value={formData.titleDescription}
                         onChange={handleFormChange}
                         className="w-full p-2 border rounded bg-[#D9D9D9]"
                     />
                 </div>
 
-                {/* Address */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">Address</label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Address</label>
                     <input
                         type="text"
                         name="address"
-                        placeholder={'Text Here...'}
+                        placeholder="Text Here..."
                         value={formData.address}
                         onChange={handleFormChange}
                         className="w-full p-2 border rounded bg-[#D9D9D9]"
                     />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="mb-4 flex">
-                        <label className="text-black font-bold mb-2 w-1/3">Price</label>
-                        <select
-                            name="sizeType"
-                            value={formData.sizeType}
-                            onChange={handleFormChange}
-                            className="w-4/5 p-2 border rounded bg-[#D9D9D9]"
-                        >
-                            <option value="">Per Acres</option>
-                            <option value="hectares">Per Hectares</option>
-                        </select>
-                    </div>
 
-                    {/* Price */}
-                    <div className="mb-4 flex">
-                        <input
-                            type="text"
-                            name="price"
-                            placeholder={'RS.000.000'}
-                            value={formData.price}
-                            onChange={handleFormChange}
-                            className="w-full p-2 border rounded bg-[#D9D9D9]"
-                        />
-                    </div>
-
-                    <div className="mb-4 flex">
-                        <label className="text-black font-bold mb-2 w-1/3">Size Type</label>
-                        <select
-                            name="sizeType"
-                            value={formData.sizeType}
-                            onChange={handleFormChange}
-                            className="w-4/5 p-2 border rounded bg-[#D9D9D9]"
-                        >
-                            <option value="">Per Acres</option>
-                            <option value="hectares">Per Hectares</option>
-                        </select>
-                    </div>
-
-                    <div className="mb-4 flex">
-                        <input
-                            type="text"
-                            name="price"
-                            value={formData.sizeCount}
-                            onChange={handleFormChange}
-                            className="w-full p-2 border rounded bg-[#D9D9D9]"
-                        />
-                    </div>
-                </div>
-
-                {/* Agent */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">Agent</label>
-                    <select
-                        name="agent"
-                        value={formData.agent}
-                        onChange={handleFormChange}
-                        className="w-full p-2 border rounded bg-[#D9D9D9]"
-                    >
-                        <option value="">Select Agent</option>
-                        <option value="Agent1">Agent 1</option>
-                        <option value="Agent2">Agent 2</option>
-                    </select>
-                </div>
-
-                {/* Map */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">Map  </label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Price</label>
                     <input
                         type="text"
                         name="price"
-                        placeholder={'Drop Link...'}
+                        placeholder="RS.000.000"
+                        value={formData.price}
+                        onChange={handleFormChange}
+                        className="w-full p-2 border rounded bg-[#D9D9D9]"
+                    />
+                </div>
+
+                <div className="mb-4 grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                        <label className="text-black font-bold mb-2">Square Feet</label>
+                        <input
+                            type="number"
+                            name="squareFeet"
+                            placeholder="Enter Square Feet"
+                            value={formData.squareFeet}
+                            onChange={handleFormChange}
+                            className="p-2 border rounded bg-[#D9D9D9]"
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <label className="text-black font-bold mb-2">Bedrooms</label>
+                        <input
+                            type="number"
+                            name="bedrooms"
+                            placeholder="Enter Number of Bedrooms"
+                            value={formData.bedrooms}
+                            onChange={handleFormChange}
+                            className="p-2 border rounded bg-[#D9D9D9]"
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <label className="text-black font-bold mb-2">Bathrooms</label>
+                        <input
+                            type="number"
+                            name="bathrooms"
+                            placeholder="Enter Number of Bathrooms"
+                            value={formData.bathrooms}
+                            onChange={handleFormChange}
+                            className="p-2 border rounded bg-[#D9D9D9]"
+                        />
+                    </div>
+
+                    <div className="flex flex-col">
+                    <label className="block text-black font-bold mb-2">Parking</label>
+                    <input
+                        type="text"
+                        name="parking"
+                        placeholder="Parking Availability"
+                        value={formData.parking}
+                        onChange={handleFormChange}
+                        className="p-2 border rounded bg-[#D9D9D9]"
+                    />
+                </div>
+                </div>
+
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Agent</label>
+                    <input
+                        type="text"
+                        name="agent"
+                        placeholder="Agent Name"
+                        value={formData.agent}
+                        onChange={handleFormChange}
+                        className="w-full p-2 border rounded bg-[#D9D9D9]"
+                    />
+                </div>
+
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Map</label>
+                    <input
+                        type="text"
+                        name="map"
+                        placeholder="Map Link Here..."
                         value={formData.map}
                         onChange={handleFormChange}
                         className="w-full p-2 border rounded bg-[#D9D9D9]"
                     />
                 </div>
 
-                {/* Description */}
-                <div className="mb-6 flex">
-                    <label className="text-black font-bold mb-2 w-1/6">Description</label>
+                <div className="mb-6">
+                    <label className="block text-black font-bold mb-2">Description</label>
                     <textarea
-                        name="titleDescription"
-                        rows={10}
-                        placeholder={'Text Here...'}
+                        name="description"
+                        rows={5}
+                        placeholder="Text Here..."
                         value={formData.description}
                         onChange={handleFormChange}
                         className="w-full p-2 border rounded bg-[#D9D9D9]"
                     />
                 </div>
-            </div>
-            <div className="flex justify-center mb-6">
-                <button className="bg-[#6EA3F8] text-white font-bold py-2 px-4 rounded mx-2">
-                    Save
-                </button>
-                <button className="bg-[#F95B65] text-white font-bold py-2 px-4 rounded mx-2">
-                    Delete
-                </button>
-            </div>
 
+                <div className="flex center mt-4 gap-4">
+                    <button onClick={handleSave} className="bg-blue-500 text-white p-3 rounded">Save</button>
+                    <button onClick={handleEdit} className="bg-yellow-500 text-white p-3 rounded">Edit</button>
+                    <button onClick={handleDelete} className="bg-red-500 text-white p-3 rounded">Delete</button>
+                </div>
+            </div>
         </div>
     );
 };
 
-export default houseproperty;
+export default HouseProperty;
