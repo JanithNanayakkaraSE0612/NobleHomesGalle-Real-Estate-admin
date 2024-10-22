@@ -3,12 +3,19 @@ import { FaBars, FaBell, FaSearch, FaUser } from "react-icons/fa";
 import { FiBell } from "react-icons/fi";
 import profile from "../assets/profile.png";
 import { IoIosArrowDown } from "react-icons/io";
+import {useNavigate} from "react-router-dom";
 
 const Navbar = ({sidebarToggle, setSidebarToggle}) => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
+  };
+
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate("/admin");
   };
 
   return (
@@ -37,7 +44,7 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) => {
             onClick={toggleDropdown}
           >
             <img
-              src={profile} 
+              src={profile}
               alt="User"
               className="w-8 h-8 rounded-full object-cover "
             />
@@ -48,7 +55,7 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) => {
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
               <ul className="py-1 text-gray-700">
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleProfileClick}>
                   <a href="#">Profile</a>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
