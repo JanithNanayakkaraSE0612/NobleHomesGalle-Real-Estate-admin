@@ -2,6 +2,7 @@ import React from "react";
 import Overview from "../Pages/dashboard/Overview";
 import HouseProperty from "@/Pages/property/HouseProperty"; // Renamed to follow React naming convention
 import CustomerDetailsOverview from "../Pages/Customer/customerOverview";
+import Agent from "@/Pages/dashboard/agent";
 
 const MainContent = ({ selectedPage }) => {
   const renderContent = () => {
@@ -13,7 +14,7 @@ const MainContent = ({ selectedPage }) => {
       case "Customers":
         return <CustomerDetailsOverview/>;
       case "Agents":
-        return <div>Agents Content</div>;
+        return <Agent/>;
       case "Messages":
         return <div>Messages Content</div>;
       case "Log Out":
