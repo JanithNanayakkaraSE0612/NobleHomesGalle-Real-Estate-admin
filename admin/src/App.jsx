@@ -1,16 +1,16 @@
 import { Routes, Route} from "react-router-dom";
 import AdminPannal from "./Pages/dashboard/AdminPannal";
-import Admin from "@/Pages/admin/Admin.jsx";
-import NewAdmin from "@/Pages/admin/NewAdmin.jsx";
+import SignIn from "./Pages/Login/SignIn";
+import SignUp from "./Pages/Login/SignUp";
 
 
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<AdminPannal/>}/>
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/new-admin" element={<NewAdmin />} />
+      <Route path="/" element={<AdminPannal />} />
+      <Route path="/login" element={<SignIn />} />
+      <Route path="/register" element={<SignUp />} />
     </Routes>
   );
 }
