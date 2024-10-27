@@ -3,6 +3,7 @@ import Overview from "../Pages/dashboard/Overview";
 import HouseProperty from "@/Pages/property/HouseProperty"; // Renamed to follow React naming convention
 import CustomerDetailsOverview from "../Pages/Customer/customerOverview";
 import Agent from "@/Pages/dashboard/agent";
+import { LuLogOut } from "react-icons/lu";
 
 const MainContent = ({ selectedPage }) => {
   const renderContent = () => {
@@ -15,10 +16,8 @@ const MainContent = ({ selectedPage }) => {
         return <CustomerDetailsOverview/>;
       case "Agents":
         return <Agent/>;
-      case "Messages":
-        return <div>Messages Content</div>;
       case "Log Out":
-        return <div>Logging Out...</div>; 
+        return <LuLogOut/>; 
       default:
         return <div>Main content</div>;
     }
