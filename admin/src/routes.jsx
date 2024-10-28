@@ -1,14 +1,11 @@
 import {
   HomeIcon,
   UserCircleIcon,
-  InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Agent, AgentDetails } from "@/Pages/dashboard";
 import { SignIn, SignUp } from "@/Pages/auth";
-import NewAgent from "../../admin/src/Pages/dashboard/NewAgent";
-
 const icon = {
   className: "w-5 h-5 text-inherit",
 };
@@ -43,12 +40,6 @@ export const routes = [
           },
         ],
       },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "Agents",
-        path: "/agent",
-        element: <Agent />,
-      },
     ],
   },
   {
@@ -66,22 +57,6 @@ export const routes = [
         name: "sign up",
         path: "/sign-up",
         element: <SignUp />,
-      },
-    ],
-  },
-
-  {
-    layout: "dashboard",
-    pages: [
-      {
-        name: "Agent Details",
-        path: "/agentDetails",
-        element: <AgentDetails />,
-      },
-      {
-        name: "New Agent",
-        path: "/newAgent",
-        element: <NewAgent />,
       },
     ],
   },

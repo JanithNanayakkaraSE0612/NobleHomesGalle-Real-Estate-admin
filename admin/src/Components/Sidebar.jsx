@@ -2,7 +2,6 @@ import React from 'react';
 import { IoHomeOutline } from "react-icons/io5";
 import { BsBuildings } from "react-icons/bs";
 import { FiUsers } from "react-icons/fi";
-import { LiaUserTieSolid } from "react-icons/lia";
 import { BiLogOut } from "react-icons/bi";
 import { useNavigate } from "react-router-dom"; 
 
@@ -12,7 +11,6 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
     { label: 'Overview', icon: <IoHomeOutline className="inline-block w-6 h-6 -mt-1" /> },
     { label: 'Property', icon: <BsBuildings className="inline-block w-6 h-6 -mt-1" /> },
     { label: 'Customers', icon: <FiUsers className="inline-block w-6 h-6 -mt-1" /> },
-    { label: 'Agents', icon: <LiaUserTieSolid className="inline-block w-6 h-6 -mt-1" /> },
     { label: 'Log Out', icon: <BiLogOut className="inline-block w-6 h-6 -mt-1" /> },
   ];
 
