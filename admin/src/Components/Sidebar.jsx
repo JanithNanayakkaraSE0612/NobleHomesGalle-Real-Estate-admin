@@ -1,52 +1,90 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IoHomeOutline } from "react-icons/io5";
 import { BsBuildings } from "react-icons/bs";
 import { FiUsers } from "react-icons/fi";
 import { BiLogOut } from "react-icons/bi";
-import { useNavigate } from "react-router-dom"; 
+import { MdExpandMore, MdChevronRight } from "react-icons/md"; // Dropdown icons
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ sidebarToggle, onSelectPage }) => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const [propertyDropdownOpen, setPropertyDropdownOpen] = useState(false); // Dropdown state
+
   const sidebarItems = [
-    { label: 'Overview', icon: <IoHomeOutline className="inline-block w-6 h-6 -mt-1" /> },
-    { label: 'Property', icon: <BsBuildings className="inline-block w-6 h-6 -mt-1" /> },
-    { label: 'Customers', icon: <FiUsers className="inline-block w-6 h-6 -mt-1" /> },
-    { label: 'Log Out', icon: <BiLogOut className="inline-block w-6 h-6 -mt-1" /> },
+    { label: 'Overview', icon: <IoHomeOutline className="w-6 h-6" />, route: '/overview' },
+    { label: 'Property', icon: <BsBuildings className="w-6 h-6" />, hasDropdown: true },
+    { label: 'Customers', icon: <FiUsers className="w-6 h-6" />, route: '/customers' },
+    { label: 'Log Out', icon: <BiLogOut className="w-6 h-6" />, isLogout: true },
   ];
 
   const handleLogout = () => {
-   
-    localStorage.removeItem('token'); 
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
-   
-    navigate('/login'); 
+  const handleNavigation = (route) => {
+    navigate(route);
+    onSelectPage(route);
   };
 
   return (
-    <div className={`${sidebarToggle ? "hidden" : "block"} w-64 bg-gray-100 fixed h-full px-4 py-2`}>
-      <div className="my-2 mb-4">
-        <h1 className="text-2xl text-black text-center bg-[#EBF5F5] font-bold">NobleHome</h1>
-        <h1 className="text-2xl text-black text-center bg-[#EBF5F5] font-bold">Real-Estate</h1>
+    <div className={`${sidebarToggle ? 'hidden' : 'block'} w-64 bg-gray-50 fixed h-full px-6 py-4 shadow-lg`}>
+      <div className="my-6 text-center">
+        <h1 className="text-3xl font-extrabold text-gray-800 tracking-wide">NobleHome</h1>
+        <h2 className="text-xl font-semibold text-gray-600">Real-Estate</h2>
       </div>
 
-      <hr />
-      <ul className="mt-3 font-bold">
+      <hr className="border-gray-300 my-4" />
+
+      <ul className="mt-4 space-y-4">
         {sidebarItems.map((item, index) => (
-          <li
-            key={index}
-            className="mb-2 rounded hover:shadow hover:bg-white py-3 transition duration-200 flex items-center"
-            onClick={() => {
-              if (item.isLogout) {
-                handleLogout(); 
-              } else {
-                onSelectPage(item.label); 
-              }
-            }}
-          >
-            <div className="flex items-center px-3 text-[#5C5C5C] hover:text-black cursor-pointer">
-              {item.icon}
-              <span className="ml-2 text-[#5C5C5C] hover:text-black">{item.label}</span>
+          <li key={index} className="relative">
+            <div
+              className="flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                if (item.isLogout) {
+                  handleLogout();
+                } else if (item.hasDropdown) {
+                  setPropertyDropdownOpen((prev) => !prev);
+                } else {
+                  handleNavigation(item.route);
+                }
+              }}
+            >
+              <div className="flex items-center space-x-4 text-gray-700">
+                {item.icon}
+                <span className="text-lg">{item.label}</span>
+              </div>
+
+              {item.hasDropdown && (
+                <span
+                  className={`transition-transform duration-300 ${
+                    propertyDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                >
+                  <MdExpandMore className="w-6 h-6 text-gray-600" />
+                </span>
+              )}
             </div>
+
+            {item.hasDropdown && propertyDropdownOpen && (
+              <ul className="ml-8 mt-2 space-y-2">
+                <li
+                  className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
+                  onClick={() => handleNavigation('/home-preview')}
+                >
+                  <IoHomeOutline className="w-5 h-5" />
+                  <span>Home Preview</span>
+                </li>
+                <li
+                  className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
+                  onClick={() => handleNavigation('/land-preview')}
+                >
+                  <BsBuildings className="w-5 h-5" />
+                  <span>Land Preview</span>
+                </li>
+              </ul>
+            )}
           </li>
         ))}
       </ul>
