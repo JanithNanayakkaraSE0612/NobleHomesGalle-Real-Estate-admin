@@ -4,7 +4,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Agent, AgentDetails } from "@/Pages/dashboard";
+import { Home, Profile} from "@/Pages/dashboard";
 import { SignIn, SignUp } from "@/Pages/auth";
 const icon = {
   className: "w-5 h-5 text-inherit",

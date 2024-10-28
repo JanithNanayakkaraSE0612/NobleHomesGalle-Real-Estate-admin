@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 const customerData = [
   { id: 1, name: "John Doe", email: "john@example.com", phone: "123-456-7890", joinDate: "2023-01-15", address: "123 Main St", status: "Active" },
@@ -10,6 +12,11 @@ const customerData = [
 ];
 
 const CustomerOverviewTable = () => {
+  const navigate = useNavigate();
+
+  const handleNewCustomer = () => {
+    navigate("/new-customer");
+  };
   const [selectedDate, setSelectedDate] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -47,7 +54,7 @@ const CustomerOverviewTable = () => {
           <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Export
           </button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          <button onClick={handleNewCustomer} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             New Customer
           </button>
         </div>
