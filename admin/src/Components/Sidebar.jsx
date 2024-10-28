@@ -1,12 +1,13 @@
-// Sidebar.js
 import React from 'react';
 import { IoHomeOutline } from "react-icons/io5";
 import { BsBuildings } from "react-icons/bs";
 import { FiUsers } from "react-icons/fi";
 import { LiaUserTieSolid } from "react-icons/lia";
 import { BiLogOut } from "react-icons/bi";
+import { useNavigate } from "react-router-dom"; 
 
 const Sidebar = ({ sidebarToggle, onSelectPage }) => {
+  const navigate = useNavigate(); 
   const sidebarItems = [
     { label: 'Overview', icon: <IoHomeOutline className="inline-block w-6 h-6 -mt-1" /> },
     { label: 'Property', icon: <BsBuildings className="inline-block w-6 h-6 -mt-1" /> },
@@ -14,6 +15,14 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
     { label: 'Agents', icon: <LiaUserTieSolid className="inline-block w-6 h-6 -mt-1" /> },
     { label: 'Log Out', icon: <BiLogOut className="inline-block w-6 h-6 -mt-1" /> },
   ];
+
+  const handleLogout = () => {
+   
+    localStorage.removeItem('token'); 
+
+   
+    navigate('/login'); 
+  };
 
   return (
     <div className={`${sidebarToggle ? "hidden" : "block"} w-64 bg-gray-100 fixed h-full px-4 py-2`}>
@@ -28,7 +37,13 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
           <li
             key={index}
             className="mb-2 rounded hover:shadow hover:bg-white py-3 transition duration-200 flex items-center"
-            onClick={() => onSelectPage(item.label)} 
+            onClick={() => {
+              if (item.isLogout) {
+                handleLogout(); 
+              } else {
+                onSelectPage(item.label); 
+              }
+            }}
           >
             <div className="flex items-center px-3 text-[#5C5C5C] hover:text-black cursor-pointer">
               {item.icon}
