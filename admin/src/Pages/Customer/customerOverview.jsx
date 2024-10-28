@@ -35,21 +35,6 @@ const CustomerOverviewTable = () => {
             className="p-2 border rounded bg-white"
           />
         </div>
-
-        <div className="flex items-center gap-2">
-          <label htmlFor="status" className="font-semibold text-gray-700">Filter Status:</label>
-          <select
-            id="status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 border rounded bg-white"
-          >
-            <option value="">All</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-
         <div className="flex items-center gap-4">
           <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Export
@@ -70,7 +55,6 @@ const CustomerOverviewTable = () => {
               <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Contact No</th>
               <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Join Date</th>
               <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Address</th>
-              <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
               <th className="py-3 px-6 bg-gray-200"></th>
             </tr>
           </thead>
@@ -83,11 +67,6 @@ const CustomerOverviewTable = () => {
                 <td className="py-4 px-6 text-sm text-gray-700">{customer.phone}</td>
                 <td className="py-4 px-6 text-sm text-gray-700">{customer.joinDate}</td>
                 <td className="py-4 px-6 text-sm text-gray-700">{customer.address}</td>
-                <td className="py-4 px-6 text-sm">
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${customer.status === 'Active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
-                    {customer.status}
-                  </span>
-                </td>
                 <td className="py-4 px-6 text-right">
                   <button className="text-blue-600 hover:text-blue-800">Edit</button>
                 </td>
