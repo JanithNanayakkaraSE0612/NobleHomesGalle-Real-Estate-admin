@@ -16,7 +16,7 @@ const MainContent = ({ selectedPage }) => {
       case "Log Out":
         return <LuLogOut/>; 
       default:
-        return <div>Main content</div>;
+        return <Overview />;
     }
   };
 
