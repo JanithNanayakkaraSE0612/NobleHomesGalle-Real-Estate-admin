@@ -19,7 +19,7 @@ function App() {
       <Route path="/home-preview" element={<HouseProperty />} />
       <Route path="/land-preview" element={<LandProperty />} />
       <Route path="/customer-overview" element={<CustomerOverviewTable />} />
-      <Route path="/new-customer" element={<AddNewCustomer />} />
+      <Route path="/add-new-customer" element={<AddNewCustomer />} />
     </Routes>
   );
 }

@@ -1,24 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const customerData = [
-  { id: 1, name: "John Doe", email: "john@example.com", phone: "123-456-7890", joinDate: "2023-01-15", address: "123 Main St", status: "Active" },
-  { id: 2, name: "Jane Smith", email: "jane@example.com", phone: "987-654-3210", joinDate: "2023-02-22", address: "456 Oak St", status: "Inactive" },
-  { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "456-123-7890", joinDate: "2023-03-10", address: "789 Pine St", status: "Active" },
   { id: 1, name: "John Doe", email: "john@example.com", phone: "123-456-7890", joinDate: "2023-01-15", address: "123 Main St", status: "Active" },
   { id: 2, name: "Jane Smith", email: "jane@example.com", phone: "987-654-3210", joinDate: "2023-02-22", address: "456 Oak St", status: "Inactive" },
   { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "456-123-7890", joinDate: "2023-03-10", address: "789 Pine St", status: "Active" },
 ];
 
 const CustomerOverviewTable = () => {
-  const navigate = useNavigate();
-
-  const handleNewCustomer = () => {
-    navigate("/new-customer");
-  };
   const [selectedDate, setSelectedDate] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const navigate = useNavigate(); // Initialize the navigate function
+
+  const handleNewCustomerClick = () => {
+    navigate("/add-new-customer"); // Navigate to the Add New Customer page
+  };
 
   return (
     <div className="min-h-screen p-8 bg-gray-100">
@@ -35,11 +31,29 @@ const CustomerOverviewTable = () => {
             className="p-2 border rounded bg-white"
           />
         </div>
+
+        <div className="flex items-center gap-2">
+          <label htmlFor="status" className="font-semibold text-gray-700">Filter Status:</label>
+          <select
+            id="status"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="p-2 border rounded bg-white"
+          >
+            <option value="">All</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
         <div className="flex items-center gap-4">
           <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Export
           </button>
-          <button onClick={handleNewCustomer} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          <button 
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            onClick={handleNewCustomerClick} // Call the handler when clicked
+          >
             New Customer
           </button>
         </div>
@@ -55,6 +69,7 @@ const CustomerOverviewTable = () => {
               <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Contact No</th>
               <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Join Date</th>
               <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Address</th>
+              <th className="py-3 px-6 bg-gray-200 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
               <th className="py-3 px-6 bg-gray-200"></th>
             </tr>
           </thead>
@@ -67,6 +82,11 @@ const CustomerOverviewTable = () => {
                 <td className="py-4 px-6 text-sm text-gray-700">{customer.phone}</td>
                 <td className="py-4 px-6 text-sm text-gray-700">{customer.joinDate}</td>
                 <td className="py-4 px-6 text-sm text-gray-700">{customer.address}</td>
+                <td className="py-4 px-6 text-sm">
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${customer.status === 'Active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                    {customer.status}
+                  </span>
+                </td>
                 <td className="py-4 px-6 text-right">
                   <button className="text-blue-600 hover:text-blue-800">Edit</button>
                 </td>
