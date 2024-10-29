@@ -10,10 +10,10 @@ const customerData = [
 const CustomerOverviewTable = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate(); 
 
   const handleNewCustomerClick = () => {
-    navigate("/add-new-customer"); // Navigate to the Add New Customer page
+    navigate("/add-new-customer"); 
   };
 
   return (
@@ -52,7 +52,7 @@ const CustomerOverviewTable = () => {
           </button>
           <button 
             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            onClick={handleNewCustomerClick} // Call the handler when clicked
+            onClick={handleNewCustomerClick} 
           >
             New Customer
           </button>
