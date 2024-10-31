@@ -6,6 +6,9 @@ import HouseProperty from "./Pages/property/houseproperty";
 import LandProperty from "./Pages/property/landproperty";
 import CustomerOverviewTable from "./Pages/Customer/customerOverview";
 import AddNewCustomer from "./Pages/Customer/AddNewCustomer";
+import ListHomes from "./Pages/property/ListHomes";
+import ListLands from "./Pages/property/ListLands";
+
 
 
 
@@ -20,6 +23,8 @@ function App() {
       <Route path="/land-preview" element={<LandProperty />} />
       <Route path="/customer-overview" element={<CustomerOverviewTable />} />
       <Route path="/new-customer" element={<AddNewCustomer />} />
+      <Route path="/list-homes" element={<ListHomes />} />
+      <Route path="/list-lands" element={<ListLands />} />
     </Routes>
   );
 }
