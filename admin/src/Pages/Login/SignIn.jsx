@@ -22,8 +22,8 @@ const SignIn = () => {
       {/* Right side with Login Form */}
       <div className="w-1/2 h-full bg-[#F5F5F5] flex flex-col p-20 justify-center items-center">
         <div className="mb-6 text-center">
-          <h1 className="text-[15px] font-bold uppercase font-moul">Homescape</h1>
-          <span className="tracking-widest text-[15px] font-bold uppercase font-moul">H a v e n</span>
+          <h1 className="text-[15px] font-bold uppercase font-moul">NobleHome</h1>
+          <span className="tracking-widest text-[15px] font-bold uppercase font-moul">Real-State</span>
         </div>
 
         <div className="w-full flex flex-col mb-4">

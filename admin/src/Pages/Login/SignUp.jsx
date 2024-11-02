@@ -22,13 +22,13 @@ const SignUp = () => {
       {/* Right side with Login Form */}
       <div className="w-1/2 h-full bg-[#F5F5F5] flex flex-col p-20 justify-center items-center">
         <div className="mb-6 text-center">
-          <h1 className="text-[15px] font-bold uppercase font-moul">Homescape</h1>
-          <span className="tracking-widest text-[15px] font-bold uppercase font-moul">H a v e n</span>
+          <h1 className="text-[15px] font-bold uppercase font-moul">NobleHome</h1>
+          <span className="tracking-widest text-[15px] font-bold uppercase font-moul">Real-State</span>
         </div>
 
         <div className="w-full flex flex-col mb-4">
           <h3 className="text-3xl font-semibold mb-2 flex items-center justify-center">Sign Up</h3>
-          <p className="text-base mb-2 flex items-center justify-center">Lorem ipsum dolor sit amet.</p>
+          <p className="text-base mb-2 flex items-center justify-center">Sign up to get started!.</p>
         </div>
         <form action="" onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
           <div className="relative">
