@@ -52,7 +52,7 @@ const CustomerOverviewTable = () => {
           </button>
           <button 
             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            onClick={handleNewCustomerClick} 
+            onClick={handleNewCustomerClick} // Call the handler when clicked
           >
             New Customer
           </button>
