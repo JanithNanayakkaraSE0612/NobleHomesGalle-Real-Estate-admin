@@ -48,14 +48,28 @@ const SignIn = () => {
             </span>
           </div>
 
-          <div className="flex justify-center">
-            <button type="submit" className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg">Login</button>
-            <Link to="/admin" className="text-blue-500 hover:underline font-semibold"></Link>
+          <div className="flex justify-between items-center">
+            <a href="#" className="text-blue-500 hover:underline font-semibold">Forgot password?</a>
+            <div className="flex items-center">
+              <input type="checkbox" className="w-4 h-4 mr-2" />
+              <p className="text-sm">Remember Me</p>
+            </div>
           </div>
 
+          <div className="flex justify-center">
+            <button type="submit" className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg">Login</button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-blue-500 hover:underline font-semibold">Sign Up</Link> {/* Updated to Link */}
+            </p>
+          </div>
         </form>
       </div>
 
+      {/* Left side with Image */}
       <div className="relative w-1/2 h-[690px] flex flex-col m-5 ">
         <img src={coverImg} alt="Cover" className="w-full h-full object-cover rounded-lg" />
       </div>
