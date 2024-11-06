@@ -11,6 +11,7 @@ const AdminPannal = () => {
     <div className='flex'>
       <Sidebar sidebarToggle={sidebarToggle}/>
       <Dashboard sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle}/>
+      
      
     </div>
   )
