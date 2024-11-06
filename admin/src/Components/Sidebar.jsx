@@ -76,13 +76,13 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
 
             {item.hasDropdown && propertyDropdownOpen && (
               <ul className="ml-8 mt-2 space-y-2">
-                <li
+                {/* <li
                   className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
                   onClick={() => handleNavigation("/home-preview")}
                 >
                   <IoHomeOutline className="w-5 h-5" />
                   <span>Add Home</span>
-                </li>
+                </li> */}
                 <li
                   className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
                   onClick={() => handleNavigation("/list-homes")}
@@ -90,13 +90,13 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
                   <CiViewList className="w-5 h-5" />
                   <span>List Homes</span>
                 </li>
-                <li
+                {/* <li
                   className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
                   onClick={() => handleNavigation("/land-preview")}
                 >
                   <BsBuildings className="w-5 h-5" />
                   <span>Add Land</span>
-                </li>
+                </li> */}
                 <li
                   className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
                   onClick={() => handleNavigation("/list-lands")}

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ImgUploader from "../../assets/profile.png";
 import axios from "axios";
+import API_URL from "../../config.js";
 
 const HouseProperty = () => {
   const navigate = useNavigate();
@@ -35,7 +36,6 @@ const HouseProperty = () => {
     try {
       const data = new FormData();
 
-      // Append form data
       for (const [key, value] of Object.entries(formData)) {
         if (value !== "") data.append(key, value);
       }
@@ -51,7 +51,6 @@ const HouseProperty = () => {
 
       if (video) data.append("videos", video);
 
-      // Detailed logging for debugging
       console.log("FormData Entries:", Array.from(data.entries()));
 
       const response = await axios.post(
@@ -67,7 +66,6 @@ const HouseProperty = () => {
 
       if (response.status === 201) {
         alert("house Data saved successfully!");
-        // Clear input fields
         setFormData({
           type: "house",
           city: "",
@@ -124,11 +122,11 @@ const HouseProperty = () => {
     const file = event.target.files[0];
     if (file) {
       const updatedImages = [...images];
-      updatedImages[index] = file; // Store the file object
+      updatedImages[index] = file; 
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        updatedImages[index] = reader.result; // Update with the base64 result
+        updatedImages[index] = reader.result; cd
         setImages(updatedImages);
       };
       reader.readAsDataURL(file);

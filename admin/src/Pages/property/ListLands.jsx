@@ -20,7 +20,7 @@ const ListLands = ({ property }) => {
   const [editPhotoId, setEditPhotoId] = useState(null);
 
   const handlePhotoEdit = (photoId) => {
-    setEditPhotoId(photoId);
+    setEditPhotoId(photoId); // Only enable file input for this photo
   };
 
   //get all land properties
@@ -59,9 +59,10 @@ const ListLands = ({ property }) => {
     const newFile = e.target.files[0];
     console.log(`Selected file for photoId ${photoId}:`, newFile);
 
-    // Update only the specific photo with new file data
     const updatedPhotos = editValues.photos.map((photo) =>
-      photo._id === photoId ? { ...photo, file: newFile } : photo,
+      photo._id === photoId
+        ? { ...photo, file: newFile } // Attach the file only to the specific photo
+        : photo,
     );
 
     setEditValues((prev) => ({
@@ -75,40 +76,47 @@ const ListLands = ({ property }) => {
     try {
       const formData = new FormData();
 
-      // Append text fields from editValues
+      // Append text fields from editValues except photos and videos
       Object.keys(editValues).forEach((key) => {
         if (key !== "photos" && key !== "videos") {
           formData.append(key, editValues[key]);
         }
       });
 
-      // Append only new photos for upload
-      editValues.photos.forEach((photo) => {
-        if (photo.file) {
-          formData.append("photos", photo.file); // Only new files get appended
-        }
+      // Track photo replacements separately
+      const replacePhotoPromises = editValues.photos
+        .filter((photo) => photo.file) // Only modified photos
+        .map((photo) => {
+          const replaceFormData = new FormData();
+          replaceFormData.append("photo", photo.file);
+          return axios.put(
+            `http://localhost:5000/api/property/replace/${editRowId}/photos/${photo.public_id}`,
+            replaceFormData,
+            { headers: { "Content-Type": "multipart/form-data" } },
+          );
+        });
+
+      // Update other fields (including videos)
+      editValues.videos.forEach((video) => {
+        formData.append("videos", video);
       });
 
-      // Append videos as before
-      editValues.videos.forEach((video) => formData.append("videos", video));
-
-      const response = await axios.put(
+      // Make primary update call
+      const updateResponse = await axios.put(
         `http://localhost:5000/api/property/update/${editRowId}`,
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        },
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
 
-      console.log("API Response:", response);
+      console.log("Primary update response:", updateResponse);
 
-      // Update state, reset edit mode
-      setLandData((prevData) =>
-        prevData.map((land) =>
-          land._id === editRowId ? { ...land, ...editValues } : land,
-        ),
-      );
-      setEditRowId(null);
+      // Call replace API for photos that have been modified
+      const replacePhotoResponses = await Promise.all(replacePhotoPromises);
+      console.log("Photo replacement responses:", replacePhotoResponses);
+
+      // Refresh properties list
+      await fetchProperties();
+      setEditRowId(null); // Exit edit mode
     } catch (error) {
       console.error("Error updating property:", error);
     }
@@ -504,7 +512,7 @@ const ListLands = ({ property }) => {
                             <ul>
                               {land.photos.map((photo) => (
                                 <li
-                                  key={photo._id || photo.public_id} // Use _id or public_id as key
+                                  key={photo._id || photo.public_id}
                                   className="my-2 flex items-center"
                                 >
                                   {editPhotoId === photo._id ? (
@@ -522,7 +530,6 @@ const ListLands = ({ property }) => {
                                       className="w-20 h-10 object-cover rounded mr-2"
                                     />
                                   )}
-
                                   <button
                                     onClick={() => handlePhotoEdit(photo._id)}
                                     className="text-blue-600 hover:text-blue-800 mx-2"

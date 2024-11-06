@@ -17,9 +17,10 @@ const ListHomes = ({ property }) => {
   const [editRowId, setEditRowId] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [editPhotoId, setEditPhotoId] = useState(null);
+  const [editVideoId, setEditVideoId] = useState(null);
 
   const handlePhotoEdit = (photoId) => {
-    setEditPhotoId(photoId);
+    setEditPhotoId(photoId); 
   };
 
   //get all house properties
@@ -31,14 +32,12 @@ const ListHomes = ({ property }) => {
         (house) => house.type === "house",
       );
 
-      setHouseData(filteredData); 
+      setHouseData(filteredData);
     } catch (error) {
       console.error("Error fetching properties:", error);
     }
   };
 
-
-  // Call fetchProperties initially in useEffect
   useEffect(() => {
     fetchProperties();
   }, []);
@@ -53,14 +52,15 @@ const ListHomes = ({ property }) => {
     setEditValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle photo and video file selection
+  // Handle photo 
   const handleFileChange = (e, photoId) => {
     const newFile = e.target.files[0];
     console.log(`Selected file for photoId ${photoId}:`, newFile);
 
-    // Update only the specific photo with new file data
     const updatedPhotos = editValues.photos.map((photo) =>
-      photo._id === photoId ? { ...photo, file: newFile } : photo,
+      photo._id === photoId
+        ? { ...photo, file: newFile } 
+        : photo,
     );
 
     setEditValues((prev) => ({
@@ -69,49 +69,71 @@ const ListHomes = ({ property }) => {
     }));
   };
 
-  //update property
-  const handleUpdate = async () => {
-    try {
-      const formData = new FormData();
 
-      // Append text fields from editValues
-      Object.keys(editValues).forEach((key) => {
-        if (key !== "photos" && key !== "videos") {
-          formData.append(key, editValues[key]);
-        }
-      });
+  const handleVideoChange = (e, videoId) => {
+    const newFile = e.target.files[0];
+    console.log(`Selected file for videoId ${videoId}:`, newFile);
 
-      // Append only new photos for upload
-      editValues.photos.forEach((photo) => {
-        if (photo.file) {
-          formData.append("photos", photo.file); // Only new files get appended
-        }
-      });
+    const updatedVideos = editValues.videos.map((video) =>
+      video._id === videoId ? { ...video, file: newFile } : video,
+    );
 
-      // Append videos as before
-      editValues.videos.forEach((video) => formData.append("videos", video));
-
-      const response = await axios.put(
-        `http://localhost:5000/api/property/update/${editRowId}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        },
-      );
-
-      console.log("API Response:", response);
-
-      // Update state, reset edit mode
-      setHouseData((prevData) =>
-        prevData.map((house) =>
-          house._id === editRowId ? { ...house, ...editValues } : house,
-        ),
-      );
-      setEditRowId(null);
-    } catch (error) {
-      console.error("Error updating property:", error);
-    }
+    setEditValues((prev) => ({
+      ...prev,
+      videos: updatedVideos,
+    }));
   };
+
+
+  const handleVideoEdit = (videoId) => {
+    setEditVideoId(videoId); 
+  };
+
+  //update property
+ const handleUpdate = async () => {
+   try {
+     const formData = new FormData();
+
+     Object.keys(editValues).forEach((key) => {
+       if (key !== "photos" && key !== "videos") {
+         formData.append(key, editValues[key]);
+       }
+     });
+
+     const replacePhotoPromises = editValues.photos
+       .filter((photo) => photo.file) 
+       .map((photo) => {
+         const replaceFormData = new FormData();
+         replaceFormData.append("photo", photo.file);
+         return axios.put(
+           `http://localhost:5000/api/property/replace/${editRowId}/photos/${photo.public_id}`,
+           replaceFormData,
+           { headers: { "Content-Type": "multipart/form-data" } },
+         );
+       });
+
+     editValues.videos.forEach((video) => {
+       formData.append("videos", video);
+     });
+
+     const updateResponse = await axios.put(
+       `http://localhost:5000/api/property/update/${editRowId}`,
+       formData,
+       { headers: { "Content-Type": "multipart/form-data" } },
+     );
+
+     console.log("Primary update response:", updateResponse);
+
+     const replacePhotoResponses = await Promise.all(replacePhotoPromises);
+     console.log("Photo replacement responses:", replacePhotoResponses);
+
+     await fetchProperties();
+     setEditRowId(null);
+   } catch (error) {
+     console.error("Error updating property:", error);
+   }
+ };
+
 
   //delete property
   const handleDelete = async (propertyId) => {
@@ -133,7 +155,7 @@ const ListHomes = ({ property }) => {
 
       if (response.status === 200) {
         alert("Property deleted successfully!");
-        fetchProperties(); // Re-fetch properties after deletion
+        fetchProperties(); 
       } else {
         alert(
           `Failed to delete: ${response.data.message || "An error occurred"}`,
@@ -168,12 +190,11 @@ const ListHomes = ({ property }) => {
         `http://localhost:5000/api/property/remove/${propertyId}/photos/${photoPublicId}`,
       );
 
-      console.log("API response:", response); // Log the API response
+      console.log("API response:", response); 
 
       if (response.status === 200) {
         alert("Photo deleted successfully!");
 
-        // Call fetchProperties to refresh the list
         await fetchProperties();
       } else {
         alert(
@@ -207,12 +228,11 @@ const ListHomes = ({ property }) => {
         `http://localhost:5000/api/property/remove/${propertyId}/videos/${videoPublicId}`,
       );
 
-      console.log("API response:", response); // Log the API response
+      console.log("API response:", response); 
 
       if (response.status === 200) {
         alert("Video deleted successfully!");
 
-        // Call fetchProperties to refresh the list
         await fetchProperties();
       } else {
         alert(
@@ -502,7 +522,7 @@ const ListHomes = ({ property }) => {
                             <ul>
                               {house.photos.map((photo) => (
                                 <li
-                                  key={photo._id || photo.public_id} // Use _id or public_id as key
+                                  key={photo._id || photo.public_id}
                                   className="my-2 flex items-center"
                                 >
                                   {editPhotoId === photo._id ? (
@@ -520,7 +540,6 @@ const ListHomes = ({ property }) => {
                                       className="w-20 h-10 object-cover rounded mr-2"
                                     />
                                   )}
-
                                   <button
                                     onClick={() => handlePhotoEdit(photo._id)}
                                     className="text-blue-600 hover:text-blue-800 mx-2"
@@ -573,16 +592,6 @@ const ListHomes = ({ property }) => {
                     <td className="py-4 px-6 text-sm text-gray-700 border-r border-gray-300">
                       {editRowId === house._id ? (
                         <div>
-                          {/* Input for uploading videos */}
-                          <input
-                            type="file"
-                            name="videos"
-                            accept="video/*"
-                            multiple
-                            onChange={handleFileChange}
-                            className="border p-1 mb-2"
-                          />
-
                           {house.videos && house.videos.length > 0 ? (
                             <ul>
                               {house.videos.map((video) => (
@@ -590,17 +599,26 @@ const ListHomes = ({ property }) => {
                                   key={video._id}
                                   className="my-2 flex items-center"
                                 >
-                                  {/* Video Link */}
-                                  <a
-                                    href={video.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 underline mr-2"
-                                  >
-                                    View Video
-                                  </a>
+                                  {editVideoId === video._id ? (
+                                    <input
+                                      type="file"
+                                      accept="video/*"
+                                      className="border p-1 mr-2"
+                                      onChange={(e) =>
+                                        handleFileChange(e, null, video._id)
+                                      }
+                                    />
+                                  ) : (
+                                    <a
+                                      href={video.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 underline mr-2"
+                                    >
+                                      View Video
+                                    </a>
+                                  )}
 
-                                  {/* Edit Button */}
                                   <button
                                     onClick={() => handleVideoEdit(video._id)}
                                     className="text-blue-600 hover:text-blue-800 mx-2"
@@ -608,7 +626,7 @@ const ListHomes = ({ property }) => {
                                     <FaPenToSquare className="text-green-600" />
                                   </button>
 
-                                  {/* Delete Button */}
+                                  {/* Delete button to remove this video */}
                                   <button
                                     onClick={() =>
                                       handleVideoDeletes(
@@ -633,7 +651,6 @@ const ListHomes = ({ property }) => {
                             <ul>
                               {house.videos.map((video) => (
                                 <li key={video._id} className="my-2">
-                                  {/* Video Link */}
                                   <a
                                     href={video.url}
                                     target="_blank"
