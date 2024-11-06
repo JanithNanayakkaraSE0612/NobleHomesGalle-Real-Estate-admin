@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ImgUploader from '../../assets/profile.png'; 
 import axios from "axios";
+import config from "../../config";
 
 const LandProperty = () => {
     const navigate = useNavigate();
@@ -56,7 +57,7 @@ const LandProperty = () => {
         console.log("FormData Entries:", Array.from(data.entries()));
 
         const response = await axios.post(
-          "http://localhost:5000/api/property",
+          `${config.API_URL}/property/`,
           data,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -456,7 +457,7 @@ const LandProperty = () => {
             >
               Save
             </button>
-            <button
+            {/* <button
               onClick={handleEdit}
               className="bg-yellow-500 text-white p-3 rounded"
             >
@@ -467,7 +468,7 @@ const LandProperty = () => {
               className="bg-red-500 text-white p-3 rounded"
             >
               Delete
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

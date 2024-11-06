@@ -6,6 +6,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { FaPenToSquare } from "react-icons/fa6";
 import { TbHomePlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
+import config from "../../config";
 
 const ListHomes = ({ property }) => {
   const navigate = useNavigate();
@@ -17,16 +18,12 @@ const ListHomes = ({ property }) => {
   const [editRowId, setEditRowId] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [editPhotoId, setEditPhotoId] = useState(null);
-  const [editVideoId, setEditVideoId] = useState(null);
-
-  const handlePhotoEdit = (photoId) => {
-    setEditPhotoId(photoId); 
-  };
+  const [editVideoId, setEditVideoId] = useState(null); 
 
   //get all house properties
   const fetchProperties = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/property/");
+      const response = await axios.get(`${config.API_URL}/property/`);
 
       const filteredData = response.data.data.filter(
         (house) => house.type === "house",
@@ -42,6 +39,14 @@ const ListHomes = ({ property }) => {
     fetchProperties();
   }, []);
 
+  const handlePhotoEdit = (photoId) => {
+    setEditPhotoId(photoId);
+  };
+
+  const handleVideoEdit = (videoId) => {
+    setEditVideoId(videoId);
+  };
+
   const handleEditClick = (house) => {
     setEditRowId(house._id);
     setEditValues(house);
@@ -52,42 +57,37 @@ const ListHomes = ({ property }) => {
     setEditValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle photo 
-  const handleFileChange = (e, photoId) => {
+  // Handle photo and video
+  const handleFileChange = (e, photoId = null, videoId = null) => {
     const newFile = e.target.files[0];
-    console.log(`Selected file for photoId ${photoId}:`, newFile);
-
-    const updatedPhotos = editValues.photos.map((photo) =>
-      photo._id === photoId
-        ? { ...photo, file: newFile } 
-        : photo,
+    console.log(
+      `Selected file for ${
+        photoId ? "photoId " + photoId : "videoId " + videoId
+      }:`,
+      newFile,
     );
 
-    setEditValues((prev) => ({
-      ...prev,
-      photos: updatedPhotos,
-    }));
+    if (photoId) {
+      const updatedPhotos = editValues.photos.map((photo) =>
+        photo._id === photoId ? { ...photo, file: newFile } : photo,
+      );
+
+      setEditValues((prev) => ({
+        ...prev,
+        photos: updatedPhotos,
+      }));
+    } else if (videoId) {
+      const updatedVideos = editValues.videos.map((video) =>
+        video._id === videoId ? { ...video, file: newFile } : video,
+      );
+
+      setEditValues((prev) => ({
+        ...prev,
+        videos: updatedVideos,
+      }));
+    }
   };
 
-
-  const handleVideoChange = (e, videoId) => {
-    const newFile = e.target.files[0];
-    console.log(`Selected file for videoId ${videoId}:`, newFile);
-
-    const updatedVideos = editValues.videos.map((video) =>
-      video._id === videoId ? { ...video, file: newFile } : video,
-    );
-
-    setEditValues((prev) => ({
-      ...prev,
-      videos: updatedVideos,
-    }));
-  };
-
-
-  const handleVideoEdit = (videoId) => {
-    setEditVideoId(videoId); 
-  };
 
   //update property
  const handleUpdate = async () => {
@@ -106,26 +106,37 @@ const ListHomes = ({ property }) => {
          const replaceFormData = new FormData();
          replaceFormData.append("photo", photo.file);
          return axios.put(
-           `http://localhost:5000/api/property/replace/${editRowId}/photos/${photo.public_id}`,
+           `${config.API_URL}/property/replace/${editRowId}/photos/${photo.public_id}`,
            replaceFormData,
            { headers: { "Content-Type": "multipart/form-data" } },
          );
        });
 
-     editValues.videos.forEach((video) => {
-       formData.append("videos", video);
-     });
+     // Handle video replace
+     const replaceVideoPromises = editValues.videos
+       .filter((video) => video.file) 
+       .map((video) => {
+         const replaceFormData = new FormData();
+         replaceFormData.append("video", video.file);
+         return axios.put(
+           `${config.API_URL}/property/replace/${editRowId}/videos/${video.public_id}`,
+           replaceFormData,
+           { headers: { "Content-Type": "multipart/form-data" } },
+         );
+       });
 
+     // other data update
      const updateResponse = await axios.put(
-       `http://localhost:5000/api/property/update/${editRowId}`,
+       `${config.API_URL}/property/update/${editRowId}`,
        formData,
        { headers: { "Content-Type": "multipart/form-data" } },
      );
 
-     console.log("Primary update response:", updateResponse);
-
      const replacePhotoResponses = await Promise.all(replacePhotoPromises);
-     console.log("Photo replacement responses:", replacePhotoResponses);
+     console.log("Photo replace:", replacePhotoResponses);
+
+     const replaceVideoResponses = await Promise.all(replaceVideoPromises);
+     console.log("Video replace:", replaceVideoResponses);
 
      await fetchProperties();
      setEditRowId(null);
@@ -145,7 +156,7 @@ const ListHomes = ({ property }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/property/delete/${propertyId}`,
+        `${config.API_URL}/property/delete/${propertyId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -187,7 +198,7 @@ const ListHomes = ({ property }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/property/remove/${propertyId}/photos/${photoPublicId}`,
+        `${config.API_URL}/property/remove/${propertyId}/photos/${photoPublicId}`,
       );
 
       console.log("API response:", response); 
@@ -225,7 +236,7 @@ const ListHomes = ({ property }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/property/remove/${propertyId}/videos/${videoPublicId}`,
+        `${config.API_URL}/property/remove/${propertyId}/videos/${videoPublicId}`,
       );
 
       console.log("API response:", response); 

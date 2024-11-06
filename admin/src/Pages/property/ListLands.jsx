@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FaPenToSquare } from "react-icons/fa6";
-import { TbHomePlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import { BsBuildings } from "react-icons/bs";
+import config from "../../config";
 
 const ListLands = ({ property }) => {
   const navigate = useNavigate();
@@ -18,31 +18,34 @@ const ListLands = ({ property }) => {
   const [editRowId, setEditRowId] = useState(null);
   const [editValues, setEditValues] = useState({});
   const [editPhotoId, setEditPhotoId] = useState(null);
-
-  const handlePhotoEdit = (photoId) => {
-    setEditPhotoId(photoId); // Only enable file input for this photo
-  };
+  const [editVideoId, setEditVideoId] = useState(null); 
 
   //get all land properties
   const fetchProperties = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/property/");
+      const response = await axios.get(`${config.API_URL}/property/`);
 
       const filteredData = response.data.data.filter(
         (land) => land.type === "land",
       );
 
-      setLandData(filteredData); // Update landData state with filtered lands
+      setLandData(filteredData); 
     } catch (error) {
       console.error("Error fetching properties:", error);
     }
   };
 
-
-  // Call fetchProperties initially in useEffect
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  const handlePhotoEdit = (photoId) => {
+    setEditPhotoId(photoId);
+  };
+
+  const handleVideoEdit = (videoId) => {
+    setEditVideoId(videoId);
+  };
 
   const handleEditClick = (land) => {
     setEditRowId(land._id);
@@ -54,21 +57,35 @@ const ListLands = ({ property }) => {
     setEditValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle photo and video file selection
-  const handleFileChange = (e, photoId) => {
+  // Handle photo and video 
+  const handleFileChange = (e, photoId = null, videoId = null) => {
     const newFile = e.target.files[0];
-    console.log(`Selected file for photoId ${photoId}:`, newFile);
-
-    const updatedPhotos = editValues.photos.map((photo) =>
-      photo._id === photoId
-        ? { ...photo, file: newFile } // Attach the file only to the specific photo
-        : photo,
+    console.log(
+      `Selected file for ${
+        photoId ? "photoId " + photoId : "videoId " + videoId
+      }:`,
+      newFile,
     );
 
-    setEditValues((prev) => ({
-      ...prev,
-      photos: updatedPhotos,
-    }));
+    if (photoId) {
+      const updatedPhotos = editValues.photos.map((photo) =>
+        photo._id === photoId ? { ...photo, file: newFile } : photo,
+      );
+
+      setEditValues((prev) => ({
+        ...prev,
+        photos: updatedPhotos,
+      }));
+    } else if (videoId) {
+      const updatedVideos = editValues.videos.map((video) =>
+        video._id === videoId ? { ...video, file: newFile } : video,
+      );
+
+      setEditValues((prev) => ({
+        ...prev,
+        videos: updatedVideos,
+      }));
+    }
   };
 
   //update property
@@ -76,47 +93,52 @@ const ListLands = ({ property }) => {
     try {
       const formData = new FormData();
 
-      // Append text fields from editValues except photos and videos
       Object.keys(editValues).forEach((key) => {
         if (key !== "photos" && key !== "videos") {
           formData.append(key, editValues[key]);
         }
       });
 
-      // Track photo replacements separately
       const replacePhotoPromises = editValues.photos
-        .filter((photo) => photo.file) // Only modified photos
+        .filter((photo) => photo.file)
         .map((photo) => {
           const replaceFormData = new FormData();
           replaceFormData.append("photo", photo.file);
           return axios.put(
-            `http://localhost:5000/api/property/replace/${editRowId}/photos/${photo.public_id}`,
+            `${config.API_URL}/property/replace/${editRowId}/photos/${photo.public_id}`,
             replaceFormData,
             { headers: { "Content-Type": "multipart/form-data" } },
           );
         });
 
-      // Update other fields (including videos)
-      editValues.videos.forEach((video) => {
-        formData.append("videos", video);
-      });
+      // Handle video replace
+      const replaceVideoPromises = editValues.videos
+        .filter((video) => video.file)
+        .map((video) => {
+          const replaceFormData = new FormData();
+          replaceFormData.append("video", video.file);
+          return axios.put(
+            `${config.API_URL}/property/replace/${editRowId}/videos/${video.public_id}`,
+            replaceFormData,
+            { headers: { "Content-Type": "multipart/form-data" } },
+          );
+        });
 
-      // Make primary update call
+      // other data update
       const updateResponse = await axios.put(
-        `http://localhost:5000/api/property/update/${editRowId}`,
+        `${config.API_URL}/property/update/${editRowId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } },
       );
 
-      console.log("Primary update response:", updateResponse);
-
-      // Call replace API for photos that have been modified
       const replacePhotoResponses = await Promise.all(replacePhotoPromises);
-      console.log("Photo replacement responses:", replacePhotoResponses);
+      console.log("Photo replace:", replacePhotoResponses);
 
-      // Refresh properties list
+      const replaceVideoResponses = await Promise.all(replaceVideoPromises);
+      console.log("Video replace:", replaceVideoResponses);
+
       await fetchProperties();
-      setEditRowId(null); // Exit edit mode
+      setEditRowId(null);
     } catch (error) {
       console.error("Error updating property:", error);
     }
@@ -132,7 +154,7 @@ const ListLands = ({ property }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/property/delete/${propertyId}`,
+        `${config.API_URL}/property/delete/${propertyId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -174,7 +196,7 @@ const ListLands = ({ property }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/property/remove/${propertyId}/photos/${photoPublicId}`,
+        `${config.API_URL}/property/remove/${propertyId}/photos/${photoPublicId}`,
       );
 
       console.log("API response:", response); // Log the API response
@@ -213,7 +235,7 @@ const ListLands = ({ property }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/property/remove/${propertyId}/videos/${videoPublicId}`,
+        `${config.API_URL}/property/remove/${propertyId}/videos/${videoPublicId}`,
       );
 
       console.log("API response:", response); // Log the API response
@@ -582,16 +604,6 @@ const ListLands = ({ property }) => {
                     <td className="py-4 px-6 text-sm text-gray-700 border-r border-gray-300">
                       {editRowId === land._id ? (
                         <div>
-                          {/* Input for uploading videos */}
-                          <input
-                            type="file"
-                            name="videos"
-                            accept="video/*"
-                            multiple
-                            onChange={handleFileChange}
-                            className="border p-1 mb-2"
-                          />
-
                           {land.videos && land.videos.length > 0 ? (
                             <ul>
                               {land.videos.map((video) => (
@@ -599,17 +611,26 @@ const ListLands = ({ property }) => {
                                   key={video._id}
                                   className="my-2 flex items-center"
                                 >
-                                  {/* Video Link */}
-                                  <a
-                                    href={video.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 underline mr-2"
-                                  >
-                                    View Video
-                                  </a>
+                                  {editVideoId === video._id ? (
+                                    <input
+                                      type="file"
+                                      accept="video/*"
+                                      className="border p-1 mr-2"
+                                      onChange={(e) =>
+                                        handleFileChange(e, null, video._id)
+                                      }
+                                    />
+                                  ) : (
+                                    <a
+                                      href={video.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 underline mr-2"
+                                    >
+                                      View Video
+                                    </a>
+                                  )}
 
-                                  {/* Edit Button */}
                                   <button
                                     onClick={() => handleVideoEdit(video._id)}
                                     className="text-blue-600 hover:text-blue-800 mx-2"
@@ -617,7 +638,7 @@ const ListLands = ({ property }) => {
                                     <FaPenToSquare className="text-green-600" />
                                   </button>
 
-                                  {/* Delete Button */}
+                                  {/* Delete button to remove this video */}
                                   <button
                                     onClick={() =>
                                       handleVideoDeletes(
@@ -642,7 +663,6 @@ const ListLands = ({ property }) => {
                             <ul>
                               {land.videos.map((video) => (
                                 <li key={video._id} className="my-2">
-                                  {/* Video Link */}
                                   <a
                                     href={video.url}
                                     target="_blank"
