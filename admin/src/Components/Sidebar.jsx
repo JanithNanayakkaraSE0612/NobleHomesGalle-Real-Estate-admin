@@ -5,6 +5,7 @@ import { FiUsers } from "react-icons/fi";
 import { BiLogOut } from "react-icons/bi";
 import { MdExpandMore, MdChevronRight } from "react-icons/md"; // Dropdown icons
 import { useNavigate } from "react-router-dom";
+import { CiViewList } from "react-icons/ci";
 
 const Sidebar = ({ sidebarToggle, onSelectPage }) => {
   const navigate = useNavigate();
@@ -28,9 +29,15 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
   };
 
   return (
-    <div className={`${sidebarToggle ? 'hidden' : 'block'} w-64 bg-gray-50 fixed h-full px-6 py-4 shadow-lg`}>
+    <div
+      className={`${
+        sidebarToggle ? "hidden" : "block"
+      } w-64 bg-gray-50 fixed h-full px-6 py-4 shadow-lg`}
+    >
       <div className="my-6 text-center">
-        <h1 className="text-3xl font-extrabold text-gray-800 tracking-wide">NobleHome</h1>
+        <h1 className="text-3xl font-extrabold text-gray-800 tracking-wide">
+          NobleHome
+        </h1>
         <h2 className="text-xl font-semibold text-gray-600">Real-Estate</h2>
       </div>
 
@@ -59,7 +66,7 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
               {item.hasDropdown && (
                 <span
                   className={`transition-transform duration-300 ${
-                    propertyDropdownOpen ? 'rotate-180' : ''
+                    propertyDropdownOpen ? "rotate-180" : ""
                   }`}
                 >
                   <MdExpandMore className="w-6 h-6 text-gray-600" />
@@ -69,19 +76,33 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
 
             {item.hasDropdown && propertyDropdownOpen && (
               <ul className="ml-8 mt-2 space-y-2">
-                <li
+                {/* <li
                   className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
-                  onClick={() => handleNavigation('/home-preview')}
+                  onClick={() => handleNavigation("/home-preview")}
                 >
                   <IoHomeOutline className="w-5 h-5" />
-                  <span>Home Preview</span>
-                </li>
+                  <span>Add Home</span>
+                </li> */}
                 <li
                   className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
-                  onClick={() => handleNavigation('/land-preview')}
+                  onClick={() => handleNavigation("/list-homes")}
+                >
+                  <CiViewList className="w-5 h-5" />
+                  <span>List Homes</span>
+                </li>
+                {/* <li
+                  className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
+                  onClick={() => handleNavigation("/land-preview")}
                 >
                   <BsBuildings className="w-5 h-5" />
-                  <span>Land Preview</span>
+                  <span>Add Land</span>
+                </li> */}
+                <li
+                  className="px-3 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200 cursor-pointer text-gray-700 flex items-center space-x-2"
+                  onClick={() => handleNavigation("/list-lands")}
+                >
+                  <CiViewList className="w-5 h-5" />
+                  <span>List Lands</span>
                 </li>
               </ul>
             )}
