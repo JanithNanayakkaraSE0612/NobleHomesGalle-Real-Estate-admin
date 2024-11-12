@@ -1,20 +1,16 @@
 import React from "react";
 import Overview from "../Pages/dashboard/Overview";
-import HouseProperty from "@/Pages/property/HouseProperty"; // Renamed to follow React naming convention
-import CustomerDetailsOverview from "../Pages/Customer/customerOverview";
-import { LuLogOut } from "react-icons/lu";
-
+import HouseProperty from "@/Pages/property/HouseProperty"; 
+import SignIn from "@/Pages/Login/SignIn";
 const MainContent = ({ selectedPage }) => {
   const renderContent = () => {
     switch (selectedPage) {
       case "Overview":
         return <Overview />;
       case "Property":
-        return <HouseProperty />; // Updated to use the correct component
-      case "Customers":
-        return <CustomerDetailsOverview/>;
+        return <HouseProperty />;
       case "Log Out":
-        return <LuLogOut/>; 
+        return <SignIn/>; 
       default:
         return <Overview />;
     }

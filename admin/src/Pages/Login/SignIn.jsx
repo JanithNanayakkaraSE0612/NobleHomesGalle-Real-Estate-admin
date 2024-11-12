@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import coverImg from "../../assets/signInBg.jpeg";
 import { LuUser } from "react-icons/lu";
 import { IoKeyOutline, IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
@@ -8,9 +8,13 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Your login logic here (e.g., authentication)
+    // Navigate to the dashboard after successful login
+    navigate("/login");
   };
 
   const toggleShowPassword = () => {
@@ -30,29 +34,51 @@ const SignIn = () => {
           <h3 className="text-3xl font-semibold mb-2 flex items-center justify-center">Sign In</h3>
           <p className="text-base mb-2 flex items-center justify-center">Welcome Back! Please enter your details.</p>
         </div>
-        <form action="" onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
+        <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <LuUser  className="text-gray-400" />
+              <LuUser className="text-gray-400" />
             </span>
-            <input type="text" id="username" className="w-full p-3 pl-10 border border-gray-300 rounded-lg" placeholder="Username" required />
+            <input
+              type="text"
+              id="username"
+              className="w-full p-3 pl-10 border border-gray-300 rounded-lg"
+              placeholder="Username"
+              required
+            />
           </div>
 
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
               <IoKeyOutline className="text-gray-400" />
             </span>
-            <input type={showPassword ? "text" : "password"} id="password" className="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg" placeholder="Password" required />
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" onClick={toggleShowPassword}>
-              {showPassword ? <IoEyeOutline className="text-gray-400" /> : <IoEyeOffOutline className="text-gray-400" />}
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              className="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg"
+              placeholder="Password"
+              required
+            />
+            <span
+              className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+              onClick={toggleShowPassword}
+            >
+              {showPassword ? (
+                <IoEyeOutline className="text-gray-400" />
+              ) : (
+                <IoEyeOffOutline className="text-gray-400" />
+              )}
             </span>
           </div>
 
           <div className="flex justify-center">
-            <button type="submit" className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg">Login</button>
-            <Link to="/admin" className="text-blue-500 hover:underline font-semibold"></Link>
+            <button
+              type="submit"
+              className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              Login
+            </button>
           </div>
-
         </form>
       </div>
 
