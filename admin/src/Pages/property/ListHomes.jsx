@@ -1,29 +1,59 @@
-import React, { useState } from 'react';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import { getApp } from 'firebase/app';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { db } from '../../firebase'; 
+import React, { useState } from "react";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getApp } from "firebase/app";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { db } from "../../firebase";
 
 const ListHomes = () => {
-  const [address, setAddress] = useState('');
-  const [price, setPrice] = useState('');
-  const [bedrooms, setBedrooms] = useState('');
-  const [bathrooms, setBathrooms] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageFile, setImageFile] = useState(null);  // State to store selected image
+  const [title, setTitle] = useState("");
+  const [address, setAddress] = useState("");
+  const [price, setPrice] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [bathrooms, setBathrooms] = useState("");
+  const [rooms, setRooms] = useState("");
+  const [parkingAvailable, setParkingAvailable] = useState(false);
+  const [parkingSpace, setParkingSpace] = useState("");
+  const [perches, setPerches] = useState("");
+  const [floorArea, setFloorArea] = useState("");
+  const [noOfFloors, setNoOfFloors] = useState("");
+  const [furnishedStatus, setFurnishedStatus] = useState("unfurnished");
+  const [ageOfBuilding, setAgeOfBuilding] = useState("");
+  const [roadWidth, setRoadWidth] = useState("");
+  const [description, setDescription] = useState("");
+  const [propertyFeatures, setPropertyFeatures] = useState([]);
+  const [town, setTown] = useState("");
+  const [city, setCity] = useState("");
+  const [propertyType, setPropertyType] = useState("house");
+  const [mapUrl, setMapUrl] = useState("");
+
+  const [imageFiles, setImageFiles] = useState([]); // For storing multiple images
+  const [imageUrls, setImageUrls] = useState([]); // For storing image URLs after upload
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const db = getFirestore(getApp());  // Initialize Firestore
+  const db = getFirestore(getApp()); // Initialize Firestore
   const storage = getStorage(getApp()); // Initialize Firebase Storage
 
   // Handle image upload to Firebase Storage
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImageUrl(URL.createObjectURL(file));  // Preview the image locally (optional)
+    const files = Array.from(e.target.files);
+    setImageFiles(files);
+  };
+
+  const handleFeatureChange = (e) => {
+    const { value, checked } = e.target;
+    if (checked) {
+      setPropertyFeatures([...propertyFeatures, value]);
+    } else {
+      setPropertyFeatures(
+        propertyFeatures.filter((feature) => feature !== value),
+      );
     }
   };
 
@@ -31,8 +61,23 @@ const ListHomes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!address || !price || !bedrooms || !bathrooms || !imageFile) {
-      setError('Please fill in all fields and upload an image.');
+    if (
+      !title ||
+      !address ||
+      !price ||
+      !bedrooms ||
+      !bathrooms ||
+      !rooms ||
+      !perches ||
+      !floorArea ||
+      !noOfFloors ||
+      !description ||
+      !town ||
+      !city ||
+      !propertyType ||
+      imageFiles.length === 0
+    ) {
+      setError("Please fill in all fields and upload at least one image.");
       return;
     }
 
@@ -40,44 +85,81 @@ const ListHomes = () => {
       setLoading(true);
       setError(null);
 
-      // Step 1: Upload the image to Firebase Storage
-      const storageRef = ref(storage, `homes/${Date.now()}_${imageFile.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, imageFile);
+      // Step 1: Upload the images to Firebase Storage
+      const imageUrlsTemp = [];
+      for (const file of imageFiles) {
+        const storageRef = ref(storage, `homes/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // Optionally track upload progress here
-        },
-        (err) => {
-          setError('Image upload failed. Please try again later.');
-          setLoading(false);
-        },
-        async () => {
-          // Step 2: Get the download URL of the uploaded image
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            // Optionally track upload progress here
+          },
+          (err) => {
+            setError("Image upload failed. Please try again later.");
+            setLoading(false);
+          },
+          async () => {
+            // Step 2: Get the download URL of the uploaded image
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            imageUrlsTemp.push(downloadURL);
+            if (imageUrlsTemp.length === imageFiles.length) {
+              // After all images are uploaded, proceed to add the home data
+              await addDoc(collection(db, "homes"), {
+                title,
+                address,
+                price,
+                bedrooms: Number(bedrooms),
+                bathrooms: Number(bathrooms),
+                rooms: Number(rooms),
+                parkingAvailable,
+                parkingSpace: Number(parkingSpace),
+                perches: Number(perches),
+                floorArea: Number(floorArea),
+                noOfFloors: Number(noOfFloors),
+                furnishedStatus,
+                ageOfBuilding,
+                roadWidth: Number(roadWidth),
+                description,
+                propertyFeatures,
+                town,
+                city,
+                propertyType,
+                mapUrl,
+                imageUrls: imageUrlsTemp, // Store the image URLs from Firebase Storage
+                createdAt: new Date(),
+              });
 
-          // Step 3: Add the home data to Firestore with the image URL
-          await addDoc(collection(db, 'homes'), {
-            address,
-            price,
-            bedrooms: Number(bedrooms),
-            bathrooms: Number(bathrooms),
-            imageUrl: downloadURL,  // Store the image URL from Firebase Storage
-            createdAt: new Date(),
-          });
-
-          setSuccessMessage('House listed successfully!');
-          setAddress('');
-          setPrice('');
-          setBedrooms('');
-          setBathrooms('');
-          setImageFile(null);
-          setImageUrl('');
-        }
-      );
+              setSuccessMessage("House listed successfully!");
+              setTitle("");
+              setAddress("");
+              setPrice("");
+              setBedrooms("");
+              setBathrooms("");
+              setRooms("");
+              setParkingAvailable(false);
+              setParkingSpace("");
+              setPerches("");
+              setFloorArea("");
+              setNoOfFloors("");
+              setFurnishedStatus("unfurnished");
+              setAgeOfBuilding("");
+              setRoadWidth("");
+              setDescription("");
+              setPropertyFeatures([]);
+              setTown("");
+              setCity("");
+              setPropertyType("house");
+              setMapUrl("");
+              setImageFiles([]);
+              setImageUrls([]);
+            }
+          },
+        );
+      }
     } catch (err) {
-      setError('Failed to list the home. Please try again later.');
+      setError("Failed to list the home. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -85,14 +167,39 @@ const ListHomes = () => {
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-center mb-6">List a New Home</h2>
+      <h2 className="text-2xl font-semibold text-center mb-6">
+        List a New Home
+      </h2>
 
-      {error && <div className="bg-red-500 text-white p-3 mb-4 rounded">{error}</div>}
-      {successMessage && <div className="bg-green-500 text-white p-3 mb-4 rounded">{successMessage}</div>}
+      {error && (
+        <div className="bg-red-500 text-white p-3 mb-4 rounded">{error}</div>
+      )}
+      {successMessage && (
+        <div className="bg-green-500 text-white p-3 mb-4 rounded">
+          {successMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Address</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Address */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Address
+          </label>
           <input
             type="text"
             value={address}
@@ -102,8 +209,11 @@ const ListHomes = () => {
           />
         </div>
 
+        {/* Price */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Price</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Price
+          </label>
           <input
             type="number"
             value={price}
@@ -113,8 +223,11 @@ const ListHomes = () => {
           />
         </div>
 
+        {/* Bedrooms */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Bedrooms</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Bedrooms
+          </label>
           <input
             type="number"
             value={bedrooms}
@@ -124,8 +237,11 @@ const ListHomes = () => {
           />
         </div>
 
+        {/* Bathrooms */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Bathrooms</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Bathrooms
+          </label>
           <input
             type="number"
             value={bathrooms}
@@ -135,27 +251,427 @@ const ListHomes = () => {
           />
         </div>
 
+        {/* Number of Rooms */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Image</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Rooms
+          </label>
+          <input
+            type="number"
+            value={rooms}
+            onChange={(e) => setRooms(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Parking Availability */}
+        <div className="form-group flex items-center">
+          <input
+            type="checkbox"
+            checked={parkingAvailable}
+            onChange={() => setParkingAvailable(!parkingAvailable)}
+            className="mr-2"
+          />
+          <label className="text-sm font-medium text-gray-700">
+            Parking Available
+          </label>
+        </div>
+
+        {/* Parking Spaces */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Parking Spaces
+          </label>
+          <input
+            type="number"
+            value={parkingSpace}
+            onChange={(e) => setParkingSpace(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Perches */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Perches
+          </label>
+          <input
+            type="number"
+            value={perches}
+            onChange={(e) => setPerches(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Floor Area */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Floor Area
+          </label>
+          <input
+            type="number"
+            value={floorArea}
+            onChange={(e) => setFloorArea(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Number of Floors */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Floors
+          </label>
+          <input
+            type="number"
+            value={noOfFloors}
+            onChange={(e) => setNoOfFloors(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Furnished Status */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Furnished Status
+          </label>
+          <select
+            value={furnishedStatus}
+            onChange={(e) => setFurnishedStatus(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="unFurnished">Un-Furnished</option>
+            <option value="furnished">Furnished</option>
+            <option value="semiFurnished">Semi-Furnished</option>
+          </select>
+        </div>
+
+        {/* Age Of Building */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Age of Building
+          </label>
+          <input
+            value={ageOfBuilding}
+            onChange={(e) => {
+              const value = e.target.value.replace(" years", "");
+              setAgeOfBuilding(value);
+            }}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Age Of Building */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Approach road width
+          </label>
+          <input
+            type="number"
+            value={roadWidth}
+            onChange={(e) => {
+              const value = e.target.value.replace(" ft", "");
+              setRoadWidth(value);
+            }}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Property Features */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Property Features
+          </label>
+          <div className="flex flex-wrap py-4 px-4">
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="Beach Front/Sea View"
+                checked={propertyFeatures.includes("Beach Front/Sea View")}
+                onChange={handleFeatureChange}
+              />
+              Beach Front/Sea View
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="Mainline Water"
+                checked={propertyFeatures.includes("Mainline Water")}
+                onChange={handleFeatureChange}
+              />
+              Mainline Water
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="Lawn Garden"
+                checked={propertyFeatures.includes("Lawn Garden")}
+                onChange={handleFeatureChange}
+              />
+              Lawn Garden
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="Garage"
+                checked={propertyFeatures.includes("Garage")}
+                onChange={handleFeatureChange}
+              />
+              Garage
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="colonial-architecture"
+                checked={propertyFeatures.includes("colonial-architecture")}
+                onChange={handleFeatureChange}
+              />
+              Colonial-architecture
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="maid's Toilet"
+                checked={propertyFeatures.includes("maid's Toilet")}
+                onChange={handleFeatureChange}
+              />
+              Maid's Toilet
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="maid's Room"
+                checked={propertyFeatures.includes("maid's Room")}
+                onChange={handleFeatureChange}
+              />
+              Maid's Room
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="home-security-system"
+                checked={propertyFeatures.includes("home-security-system")}
+                onChange={handleFeatureChange}
+              />
+              Home Security System
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="brand-new"
+                checked={propertyFeatures.includes("brand-new")}
+                onChange={handleFeatureChange}
+              />
+              Brand New
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="overheated-water-storage"
+                checked={propertyFeatures.includes("overheated-water-storage")}
+                onChange={handleFeatureChange}
+              />
+              Overheated Water Storage
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="luxury-spects"
+                checked={propertyFeatures.includes("luxury-spects")}
+                onChange={handleFeatureChange}
+              />
+              Luxury Spects
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="overheated-water-storage"
+                checked={propertyFeatures.includes("overheated-water-storage")}
+                onChange={handleFeatureChange}
+              />
+              Overheated Water Storage
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="gated-community"
+                checked={propertyFeatures.includes("gated-community")}
+                onChange={handleFeatureChange}
+              />
+              Gated Community
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="attached-toilets"
+                checked={propertyFeatures.includes("attached-toilets")}
+                onChange={handleFeatureChange}
+              />
+              Attached Toilets
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="roof-top-garden"
+                checked={propertyFeatures.includes("roof-top-garden")}
+                onChange={handleFeatureChange}
+              />
+              Roof Top Garden
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="hot-water"
+                checked={propertyFeatures.includes("hot-water")}
+                onChange={handleFeatureChange}
+              />
+              Hot Water
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="ac-rooms"
+                checked={propertyFeatures.includes("ac-rooms")}
+                onChange={handleFeatureChange}
+              />
+              AC Rooms
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="3-phase-electricity"
+                checked={propertyFeatures.includes("3-phase-electricity")}
+                onChange={handleFeatureChange}
+              />
+              3 Phase Electricity
+            </label>
+            <label className="w-1/2">
+              <input
+                type="checkbox"
+                value="24-hour-security"
+                checked={propertyFeatures.includes("24-hour-security")}
+                onChange={handleFeatureChange}
+              />
+              24 Hour Security
+            </label>
+          </div>
+        </div>
+
+        {/* Town */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Town
+          </label>
+          <input
+            type="text"
+            value={town}
+            onChange={(e) => setTown(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* City */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            City
+          </label>
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Property Type */}
+         <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Property Type
+          </label>
+          <select
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="house">House</option>
+            <option value="land">Land</option>
+          </select>
+        </div> 
+
+        {/* Map URL */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Map URL
+          </label>
+          <input
+            type="text"
+            value={mapUrl}
+            onChange={(e) => setMapUrl(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Images (Select 5 or more)
+          </label>
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={handleImageChange}
             required
             className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Image Previews */}
         <div className="form-group">
-          {imageUrl && <img src={imageUrl} alt="Image preview" className="w-full h-40 object-cover rounded-md mt-2" />}
+          {imageFiles.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {imageFiles.map((file, index) => (
+                <img
+                  key={index}
+                  src={URL.createObjectURL(file)}
+                  alt={`Image preview ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-md"
+                />
+              ))}
+            </div>
+          )}
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
           className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          {loading ? 'Listing...' : 'List Home'}
+          {loading ? "Listing..." : "List Home"}
         </button>
       </form>
     </div>

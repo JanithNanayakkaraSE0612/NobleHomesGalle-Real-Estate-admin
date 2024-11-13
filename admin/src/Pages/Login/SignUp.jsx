@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Import Link
-import coverImg from "../../assets/signInBg.jpeg";
-import { LuUser } from "react-icons/lu";
-import { IoKeyOutline, IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
+import coverImg from "../../assets/signUpBg.jpeg";
+import { LuUser  } from "react-icons/lu";
+import { IoKeyOutline, IoEyeOutline, IoEyeOffOutline, IoMailOutline } from "react-icons/io5";
 
-const SignIn = () => {
+const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,15 +27,22 @@ const SignIn = () => {
         </div>
 
         <div className="w-full flex flex-col mb-4">
-          <h3 className="text-3xl font-semibold mb-2 flex items-center justify-center">Sign In</h3>
-          <p className="text-base mb-2 flex items-center justify-center">Welcome Back! Please enter your details.</p>
+          <h3 className="text-3xl font-semibold mb-2 flex items-center justify-center">Sign Up</h3>
+          <p className="text-base mb-2 flex items-center justify-center">Lorem ipsum dolor sit amet.</p>
         </div>
         <form action="" onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
               <LuUser  className="text-gray-400" />
             </span>
-            <input type="text" id="username" className="w-full p-3 pl-10 border border-gray-300 rounded-lg" placeholder="Username" required />
+            <input type="text" id="name" className="w-full p-3 pl-10 border border-gray-300 rounded-lg" placeholder="Full Name" required />
+          </div>
+
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <IoMailOutline className="text-gray-400" />
+            </span>
+            <input type="email" id="email" className="w-full p-3 pl-10 border border-gray-300 rounded-lg" placeholder="Email" required />
           </div>
 
           <div className="relative">
@@ -57,13 +64,13 @@ const SignIn = () => {
           </div>
 
           <div className="flex justify-center">
-            <button type="submit" className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg">Login</button>
+            <button type="submit" className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg">Sign Up</button>
           </div>
 
           <div className="text-center">
             <p className="text-gray-600">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-blue-500 hover:underline font-semibold">Sign Up</Link> {/* Updated to Link */}
+              Already have an account?{" "}
+              <Link to="/login" className="text-blue-500 hover:underline font-semibold">Sign In</Link> {/* Updated to Link */}
             </p>
           </div>
         </form>
@@ -77,4 +84,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
