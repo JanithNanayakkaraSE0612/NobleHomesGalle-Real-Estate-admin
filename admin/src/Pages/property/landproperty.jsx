@@ -1,478 +1,351 @@
-import { ChevronLeftIcon } from "@heroicons/react/24/solid";
-import { FaEdit } from "react-icons/fa";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ImgUploader from '../../assets/profile.png'; 
-import axios from "axios";
-import config from "../../config";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getApp } from "firebase/app";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { db } from "../../firebase";
 
 const LandProperty = () => {
-    const navigate = useNavigate();
-    const [fullScreenImage, setFullScreenImage] = useState("");
-    const [images, setImages] = useState(Array(6).fill(""));
-    const [video, setVideo] = useState(null);
-    
-    const [formData, setFormData] = useState({
-      type: "land",
-      city: "",
-      title: "",
-      titleDescription: "",
-      address: "",
-      price: "",
-      sizeCount: "",
-      agent: "",
-      map: "",
-      description: "",
-      bedrooms: "",
-      bathrooms: "",
-      parking: "",
-      squareFeet: "",
-      sizeType: "",
-      size: "",
-      priceType: "",
-      pricePerUnit: "",
-    });
+  const [title, setTitle] = useState("");
+  const [address, setAddress] = useState("");
+  const [price, setPrice] = useState("");
+  const [perches, setPerches] = useState("");
+  const [shapeOfLand, setShapeOfLand] = useState("");
+  const [ageOfBuilding, setAgeOfBuilding] = useState("");
+  const [roadWidth, setRoadWidth] = useState("");
+  const [description, setDescription] = useState("");
+  const [town, setTown] = useState("");
+  const [city, setCity] = useState("");
+  const [propertyType, setPropertyType] = useState("house");
+  const [mapUrl, setMapUrl] = useState("");
+  const [imageFiles, setImageFiles] = useState([]); // For storing multiple images
+  const [imageUrls, setImageUrls] = useState([]); // For storing image URLs after upload
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
-    const handleSave = async () => {
-      try {
-        const data = new FormData();
+  const db = getFirestore(getApp()); // Initialize Firestore
+  const storage = getStorage(getApp()); // Initialize Firebase Storage
 
-        // Append form data
-        for (const [key, value] of Object.entries(formData)) {
-          if (value !== "") data.append(key, value);
-        }
+  // Handle image upload to Firebase Storage
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageFiles(files);
+  };
 
-        images.forEach((image, index) => {
-          if (image) {
-            const file = new File([image], `photo${index}.jpg`, {
-              type: "image/jpeg",
-            });
-            data.append("photos", file);
-          }
-        });
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        if (video) data.append("videos", video);
+    if (
+      !title ||
+      !address ||
+      !price ||
+      !perches ||
+      !shapeOfLand ||
+      !description ||
+      !town ||
+      !city ||
+      !propertyType ||
+      imageFiles.length === 0
+    ) {
+      setError("Please fill in all fields and upload at least one image.");
+      return;
+    }
 
-        // Detailed logging for debugging
-        console.log("FormData Entries:", Array.from(data.entries()));
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await axios.post(
-          `${config.API_URL}/property/`,
-          data,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
+      // Step 1: Upload the images to Firebase Storage
+      const imageUrlsTemp = [];
+      for (const file of imageFiles) {
+        const storageRef = ref(storage, `homes/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            // Optionally track upload progress here
+          },
+          (err) => {
+            setError("Image upload failed. Please try again later.");
+            setLoading(false);
+          },
+          async () => {
+            // Step 2: Get the download URL of the uploaded image
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            imageUrlsTemp.push(downloadURL);
+            if (imageUrlsTemp.length === imageFiles.length) {
+              // After all images are uploaded, proceed to add the home data
+              await addDoc(collection(db, "homes"), {
+                title,
+                address,
+                price,
+
+                parkingAvailable,
+
+                perches: Number(perches),
+                shapeOfLand,
+
+                furnishedStatus,
+                ageOfBuilding,
+                roadWidth: Number(roadWidth),
+                description,
+                propertyFeatures,
+                town,
+                city,
+                propertyType,
+                mapUrl,
+                imageUrls: imageUrlsTemp, // Store the image URLs from Firebase Storage
+                createdAt: new Date(),
+              });
+
+              setSuccessMessage("Land listed successfully!");
+              setTitle("");
+              setAddress("");
+              setPrice("");
+
+              setPerches("");
+              setShapeOfLand(""), setAgeOfBuilding("");
+              setRoadWidth("");
+              setDescription("");
+
+              setTown("");
+              setCity("");
+              setPropertyType("house");
+              setMapUrl("");
+              setImageFiles([]);
+              setImageUrls([]);
+            }
           },
         );
-
-        console.log("Response:", response.data);
-        console.log("Response Status Code:", response.status);
-
-        if (response.status === 201) {
-          alert("Land Data saved successfully!");
-          // Clear input fields
-          setFormData({
-            type: "land",
-            city: "",
-            title: "",
-            titleDescription: "",
-            address: "",
-            price: "",
-            sizeCount: "",
-            agent: "",
-            map: "",
-            description: "",
-            bedrooms: "",
-            bathrooms: "",
-            parking: "",
-            squareFeet: "",
-            sizeType: "",
-            size: "",
-            priceType: "",
-            pricePerUnit: "",
-            photos: [],
-            videos: [],
-          });
-          setImages(Array(6).fill(""));
-          setFullScreenImage("");
-          setVideo(null);
-        } else {
-          alert("Failed to save data: " + response.data.message);
-        }
-      } catch (error) {
-        console.error("Error saving data:", error.response?.data || error);
-        alert(
-          "Failed to save data: " +
-            (error.response?.data?.message || "Internal Server Error"),
-        );
       }
-    };
+    } catch (err) {
+      setError("Failed to list the home. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleBackClick = () => {
-        navigate(-1);
-    };
+  return (
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-semibold text-center mb-6">
+        List a New Land
+      </h2>
 
-    const handleFullScreenImageChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setFullScreenImage(reader.result);
-                const updatedImages = [...images];
-                updatedImages[0] = reader.result; 
-                setImages(updatedImages);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+      {error && (
+        <div className="bg-red-500 text-white p-3 mb-4 rounded">{error}</div>
+      )}
+      {successMessage && (
+        <div className="bg-green-500 text-white p-3 mb-4 rounded">
+          {successMessage}
+        </div>
+      )}
 
-    const handleImageChange = (index, event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const updatedImages = [...images];
-                updatedImages[index] = reader.result;
-                setImages(updatedImages);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
-    };
-
-    const handleEdit = () => {
-        console.log("Editing data:", formData);
-        alert("Edit mode enabled!");
-    };
-
-    const handleDelete = () => {
-        console.log("Deleting data:", formData);
-        if (window.confirm("Are you sure you want to delete this property?")) {
-            alert("Data deleted!");
-            setFormData({
-                city: "",
-                title: "",
-                titleDescription: "",
-                address: "",
-                price: "",
-                sizeType: "",
-                sizeCount: "",
-                agent: "",
-                map: "",
-                description: "",
-                bedrooms: "",
-                bathrooms: "",
-                parking: "",
-                squareFeet: "",
-            });
-            setImages(Array(6).fill(""));
-            setFullScreenImage("");
-            setVideo(null);
-        }
-    };
-
-    return (
-      <div className="flex flex-col min-h-screen bg-white p-4">
-        <div className="flex flex-col sm:flex-row justify-between mb-6 items-center">
-          <div className="flex gap-1 sm:gap-1 items-center mb-4 sm:mb-0">
-            <ChevronLeftIcon
-              className="text-black cursor-pointer"
-              style={{ width: "30px", height: "30px" }}
-              onClick={handleBackClick}
-            />
-            <h1 className="text-2xl sm:text-1xl font-bold text-black">
-              New Land
-            </h1>
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
-        <div className="relative w-full h-80 mb-6 bg-gray-200 flex items-center justify-center">
-          {fullScreenImage ? (
-            <img
-              src={fullScreenImage}
-              alt="Full Screen"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <label className="cursor-pointer text-center text-black">
-              <input
-                type="file"
-                className="hidden"
-                onChange={handleFullScreenImageChange}
-              />
-              <img
-                src={ImgUploader}
-                alt="Uploader"
-                className="w-full h-full object-cover"
-              />
-            </label>
+        {/* Address */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Address
+          </label>
+          <input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Price */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Price
+          </label>
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Perches */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Perches
+          </label>
+          <input
+            type="number"
+            value={perches}
+            onChange={(e) => setPerches(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Shape Of Land
+          </label>
+          <input
+            type="text"
+            value={shapeOfLand}
+            onChange={(e) => setPerches(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Age Of Building */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Approach road width
+          </label>
+          <input
+            type="number"
+            value={roadWidth}
+            onChange={(e) => {
+              const value = e.target.value.replace(" ft", "");
+              setRoadWidth(value);
+            }}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        {/* Description */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Town */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Town
+          </label>
+          <input
+            type="text"
+            value={town}
+            onChange={(e) => setTown(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* City */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            City
+          </label>
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Property Type */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Property Type
+          </label>
+          <select
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="house">House</option>
+            <option value="land">Land</option>
+          </select>
+        </div>
+
+        {/* Map URL */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Map URL
+          </label>
+          <input
+            type="text"
+            value={mapUrl}
+            onChange={(e) => setMapUrl(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div className="form-group">
+          <label className="block text-sm font-medium text-gray-700">
+            Images (Select 5 or more)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+            required
+            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Image Previews */}
+        <div className="form-group">
+          {imageFiles.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {imageFiles.map((file, index) => (
+                <img
+                  key={index}
+                  src={URL.createObjectURL(file)}
+                  alt={`Image preview ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-md"
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        <div className="grid grid-cols-6 gap-4 mt-12">
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className="relative bg-[#d9d9d9] h-40 flex items-center justify-center"
-            >
-              {image ? (
-                <img
-                  src={image}
-                  alt={`Uploaded ${index}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <label className="cursor-pointer text-black">
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={(event) => handleImageChange(index, event)}
-                    id={`file-input-${index}`}
-                  />
-                  <img
-                    src={ImgUploader}
-                    alt="Uploader"
-                    className="w-full h-full object-cover"
-                  />
-                </label>
-              )}
-              {index !== 0 && (
-                <FaEdit
-                  className="absolute top-2 right-2 text-black cursor-pointer w-6 h-6"
-                  onClick={() =>
-                    document.querySelector(`#file-input-${index}`).click()
-                  }
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex-grow" />
-
-        <div className="mt-16">
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">
-              Upload Video
-            </label>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={(e) => setVideo(e.target.files[0])}
-              className="w-full p-2 border border-white rounded text-red-900"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">City</label>
-            <select
-              name="city"
-              value={formData.city}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            >
-              <option value="">Select City</option>
-              <option value="Colombo">Colombo</option>
-              <option value="Kandy">Kandy</option>
-              <option value="Galle">Galle</option>
-              <option value="Negombo">Negombo</option>
-              <option value="Jaffna">Jaffna</option>
-              <option value="Anuradhapura">Anuradhapura</option>
-              <option value="Nuwara Eliya">Nuwara Eliya</option>
-              <option value="Batticaloa">Batticaloa</option>
-              <option value="Trincomalee">Trincomalee</option>
-              <option value="Matara">Matara</option>
-              <option value="Badulla">Badulla</option>
-              <option value="Vavuniya">Vavuniya</option>
-              <option value="Puttalam">Puttalam</option>
-              <option value="Kalutara">Kalutara</option>
-              <option value="Kurunegala">Kurunegala</option>
-              <option value="Mannar">Mannar</option>
-              <option value="Hambantota">Hambantota</option>
-              <option value="Polonnaruwa">Polonnaruwa</option>
-              <option value="Ratnapura">Ratnapura</option>
-            </select>
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">Title</label>
-            <input
-              type="text"
-              name="title"
-              placeholder="Text Here..."
-              value={formData.title}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">
-              Title Description
-            </label>
-            <textarea
-              name="titleDescription"
-              rows={5}
-              placeholder="Text Here..."
-              value={formData.titleDescription}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">Address</label>
-            <input
-              type="text"
-              name="address"
-              placeholder="Text Here..."
-              value={formData.address}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">Price</label>
-            <input
-              type="text"
-              name="price"
-              placeholder="RS.000.000"
-              value={formData.price}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="mb-4 grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <label className="text-black font-bold mb-2">
-                Property Size Type
-              </label>
-              <select
-                name="sizeType"
-                value={formData.sizeType}
-                onChange={handleFormChange}
-                className="p-2 border rounded bg-[#D9D9D9]"
-              >
-                <option value="">Select Size Type</option>
-                <option value="acres">Acres</option>
-                <option value="perch">Perch</option>
-              </select>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-black font-bold mb-2">
-                Property Size Amount
-              </label>
-              <input
-                type="number"
-                name="size"
-                placeholder="Enter Size Amount"
-                value={formData.size}
-                onChange={handleFormChange}
-                className="p-2 border rounded bg-[#D9D9D9]"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-black font-bold mb-2">
-                Property Price Type
-              </label>
-              <select
-                name="priceType"
-                value={formData.priceType}
-                onChange={handleFormChange}
-                className="p-2 border rounded bg-[#D9D9D9]"
-              >
-                <option value="">Select Price Type</option>
-                <option value="per_acre">Per Acre</option>
-                <option value="per_perch">Per Perch</option>
-              </select>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="block text-black font-bold mb-2">
-                Property Price per unit
-              </label>
-              <input
-                type="number"
-                name="pricePerUnit"
-                placeholder="Enter Property Price"
-                value={formData.pricePerUnit}
-                onChange={handleFormChange}
-                className="w-full p-2 border rounded bg-[#D9D9D9]"
-              />
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">Agent</label>
-            <input
-              type="text"
-              name="agent"
-              placeholder="Agent Name"
-              value={formData.agent}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">Map</label>
-            <input
-              type="text"
-              name="map"
-              placeholder="Map Link Here..."
-              value={formData.map}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-black font-bold mb-2">
-              Description
-            </label>
-            <textarea
-              name="description"
-              rows={5}
-              placeholder="Text Here..."
-              value={formData.description}
-              onChange={handleFormChange}
-              className="w-full p-2 border rounded bg-[#D9D9D9]"
-            />
-          </div>
-
-          <div className="flex center mt-4 gap-4">
-            <button
-              onClick={handleSave}
-              className="bg-blue-500 text-white p-3 rounded"
-            >
-              Save
-            </button>
-            {/* <button
-              onClick={handleEdit}
-              className="bg-yellow-500 text-white p-3 rounded"
-            >
-              Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              className="bg-red-500 text-white p-3 rounded"
-            >
-              Delete
-            </button> */}
-          </div>
-        </div>
-      </div>
-    );
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {loading ? "Listing..." : "List Land"}
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default LandProperty;
