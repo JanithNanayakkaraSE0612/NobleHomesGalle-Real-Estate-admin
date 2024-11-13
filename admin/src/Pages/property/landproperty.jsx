@@ -20,7 +20,7 @@ const LandProperty = () => {
   const [description, setDescription] = useState("");
   const [town, setTown] = useState("");
   const [city, setCity] = useState("");
-  const [propertyType, setPropertyType] = useState("house");
+  const [propertyType, setPropertyType] = useState("land");
   const [mapUrl, setMapUrl] = useState("");
   const [imageFiles, setImageFiles] = useState([]); // For storing multiple images
   const [imageUrls, setImageUrls] = useState([]); // For storing image URLs after upload
@@ -64,7 +64,7 @@ const LandProperty = () => {
       // Step 1: Upload the images to Firebase Storage
       const imageUrlsTemp = [];
       for (const file of imageFiles) {
-        const storageRef = ref(storage, `homes/${Date.now()}_${file.name}`);
+        const storageRef = ref(storage, `lands/${Date.now()}_${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
         uploadTask.on(
@@ -82,21 +82,15 @@ const LandProperty = () => {
             imageUrlsTemp.push(downloadURL);
             if (imageUrlsTemp.length === imageFiles.length) {
               // After all images are uploaded, proceed to add the home data
-              await addDoc(collection(db, "homes"), {
+              await addDoc(collection(db, "lands"), {
                 title,
                 address,
                 price,
-
-                parkingAvailable,
-
                 perches: Number(perches),
                 shapeOfLand,
-
-                furnishedStatus,
                 ageOfBuilding,
                 roadWidth: Number(roadWidth),
                 description,
-                propertyFeatures,
                 town,
                 city,
                 propertyType,
@@ -117,7 +111,7 @@ const LandProperty = () => {
 
               setTown("");
               setCity("");
-              setPropertyType("house");
+              setPropertyType("land");
               setMapUrl("");
               setImageFiles([]);
               setImageUrls([]);
@@ -211,7 +205,7 @@ const LandProperty = () => {
           <input
             type="text"
             value={shapeOfLand}
-            onChange={(e) => setPerches(e.target.value)}
+            onChange={(e) => setShapeOfLand(e.target.value)}
             required
             className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
