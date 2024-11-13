@@ -605,7 +605,7 @@ const ListHomes = () => {
         </div>
 
         {/* Property Type */}
-        {/* <div className="form-group">
+         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">
             Property Type
           </label>
@@ -618,7 +618,7 @@ const ListHomes = () => {
             <option value="house">House</option>
             <option value="land">Land</option>
           </select>
-        </div> */}
+        </div> 
 
         {/* Map URL */}
         <div className="form-group">
