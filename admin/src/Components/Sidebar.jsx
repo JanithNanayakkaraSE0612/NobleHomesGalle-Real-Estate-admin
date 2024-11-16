@@ -12,10 +12,10 @@ const Sidebar = ({ sidebarToggle, onSelectPage }) => {
   const [propertyDropdownOpen, setPropertyDropdownOpen] = useState(false); // Dropdown state
 
   const sidebarItems = [
-    { label: 'Overview', icon: <IoHomeOutline className="w-6 h-6" />, route: '/' },
-    { label: 'Property', icon: <BsBuildings className="w-6 h-6" />, hasDropdown: true },
-    { label: 'Customers', icon: <FiUsers className="w-6 h-6" />, route: '/customer-overview' },
-    { label: 'Log Out', icon: <BiLogOut className="w-6 h-6" />, isLogout: true },
+   ,
+    { label: 'Add Property', icon: <BsBuildings className="w-6 h-6" />, hasDropdown: true },
+    ,
+    ,
   ];
 
   const handleLogout = () => {

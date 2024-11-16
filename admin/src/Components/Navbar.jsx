@@ -25,12 +25,8 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) => {
 
         <button className="p-1 focus:outline-none flex items-center ">
           <div className="relative flex items-center ">
-            <FaSearch className="absolute left-3 text-gray-500" />
-            <input
-              type="text"
-              className="pl-10 pr-4 py-2 rounded-lg outline-none w-full bg-[#F4F0ED] text-sm"
-              placeholder="Search Property"
-            />
+            
+           
           </div>
         </button>
       </div>
@@ -48,7 +44,7 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) => {
               alt="User"
               className="w-8 h-8 rounded-full object-cover "
             />
-            <span className="text-sm font-medium">Kende Attila</span>
+            <span className="text-sm font-medium">Thilak Gamage</span>
             <IoIosArrowDown className="cursor-pointer" />
           </button>
 
