@@ -1,7 +1,6 @@
 import React from "react";
 import Overview from "../Pages/dashboard/Overview";
-import HouseProperty from "@/Pages/property/HouseProperty"; // Renamed to follow React naming convention
-import CustomerDetailsOverview from "../Pages/Customer/customerOverview";
+
 import { LuLogOut } from "react-icons/lu";
 
 const MainContent = ({ selectedPage }) => {
