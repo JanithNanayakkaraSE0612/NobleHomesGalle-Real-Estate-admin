@@ -2,6 +2,7 @@ import { Routes, Route} from "react-router-dom";
 import AdminPannal from "./Pages/dashboard/AdminPannal";
 import SignIn from "./Pages/Login/SignIn";
 import SignUp from "./Pages/Login/SignUp";
+import EditHome from "./Pages/dashboard/EditHome";
 
 
 import ListHomes from "./Pages/property/ListHomes";

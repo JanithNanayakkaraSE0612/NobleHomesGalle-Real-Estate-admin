@@ -44,7 +44,7 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) => {
               alt="User"
               className="w-8 h-8 rounded-full object-cover "
             />
-            <span className="text-sm font-medium">Thilak Gamage</span>
+            <span className="text-sm font-medium">Thilak Gallage</span>
             <IoIosArrowDown className="cursor-pointer" />
           </button>
 
