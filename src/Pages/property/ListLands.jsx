@@ -24,11 +24,11 @@ const ListLands = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [landUnit, setLandUnit] = useState("perches"); // Default to "perches"
 
-  const db = getFirestore(getApp()); // Initialize Firestore
-  const storage = getStorage(getApp()); // Initialize Firebase Storage
+  const db = getFirestore(getApp());
+  const storage = getStorage(getApp());
 
-  // Handle image upload to Firebase Storage
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setImageFiles(files);
@@ -45,7 +45,6 @@ const ListLands = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -54,62 +53,65 @@ const ListLands = () => {
       return;
     }
 
+    if (!perches || isNaN(perches) || perches <= 0) {
+      setError(`Please enter a valid land size in ${landUnit}.`);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      // Step 1: Upload the images to Firebase Storage
       const imageUrlsTemp = [];
       for (const file of imageFiles) {
         const storageRef = ref(storage, `homes/${Date.now()}_${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
-        uploadTask.on(
-          "state_changed",
-          null,
-          (err) => {
-            setError("Image upload failed. Please try again later.");
-            setLoading(false);
-          },
-          async () => {
-            // Step 2: Get the download URL of the uploaded image
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            imageUrlsTemp.push(downloadURL);
-            if (imageUrlsTemp.length === imageFiles.length) {
-              // After all images are uploaded, proceed to add the land data
-              await addDoc(collection(db, "homes"), {
-                title,
-                address,
-                price: price ? Number(price) : undefined,
-                perches: perches ? Number(perches) : undefined,
-                description,
-                propertyFeatures,
-                town,
-                city,
-                propertyType,
-                mapUrl,
-                imageUrls: imageUrlsTemp, // Store the image URLs from Firebase Storage
-                createdAt: new Date(),
-              });
-
-              setSuccessMessage("Land listed successfully!");
-              // Reset form fields
-              setTitle("");
-              setAddress("");
-              setPrice("");
-              setPerches("");
-              setDescription("");
-              setPropertyFeatures([]);
-              setTown("");
-              setCity("");
-              setPropertyType("house");
-              setMapUrl("");
-              setImageFiles([]);
-              setImageUrls([]);
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null,
+            (err) => {
+              reject(err);
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              imageUrlsTemp.push(downloadURL);
+              resolve();
             }
-          }
-        );
+          );
+        });
       }
+
+      await addDoc(collection(db, "homes"), {
+        title,
+        address,
+        price: price ? Number(price) : undefined,
+        perches: perches ? Number(perches) : undefined,
+        landUnit,
+        description,
+        propertyFeatures,
+        town,
+        city,
+        propertyType,
+        mapUrl,
+        imageUrls: imageUrlsTemp,
+        createdAt: new Date(),
+      });
+
+      setSuccessMessage("Land listed successfully!");
+      setTitle("");
+      setAddress("");
+      setPrice("");
+      setPerches("");
+      setDescription("");
+      setPropertyFeatures([]);
+      setTown("");
+      setCity("");
+      setPropertyType("house");
+      setMapUrl("");
+      setImageFiles([]);
+      setImageUrls([]);
     } catch (err) {
       setError("Failed to list the land. Please try again later.");
     } finally {
@@ -119,21 +121,13 @@ const ListLands = () => {
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        List a New Land
-      </h2>
+      <h2 className="text-2xl font-semibold text-center mb-6">List a New Land</h2>
 
-      {error && (
-        <div className="bg-red-500 text-white p-3 mb-4 rounded">{error}</div>
-      )}
-      {successMessage && (
-        <div className="bg-green-500 text-white p-3 mb-4 rounded">
-          {successMessage}
-        </div>
-      )}
+      {error && <div className="bg-red-500 text-white p-3 mb-4 rounded">{error}</div>}
+      {successMessage && <div className="bg-green-500 text-white p-3 mb-4 rounded">{successMessage}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Title */}
+        {/* Title Input */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Title</label>
           <input
@@ -144,7 +138,7 @@ const ListLands = () => {
           />
         </div>
 
-        {/* Address */}
+        {/* Address Input */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Address</label>
           <input
@@ -155,7 +149,7 @@ const ListLands = () => {
           />
         </div>
 
-        {/* Price */}
+        {/* Price Input */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Price</label>
           <input
@@ -166,18 +160,30 @@ const ListLands = () => {
           />
         </div>
 
-        {/* Perches */}
+        {/* Land Size with Unit Selector */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Perches</label>
-          <input
-            type="number"
-            value={perches}
-            onChange={(e) => setPerches(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <label className="block text-sm font-medium text-gray-700">Land Size</label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              value={perches}
+              onChange={(e) => setPerches(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={`Enter size in ${landUnit}`}
+            />
+            <select
+              value={landUnit}
+              onChange={(e) => setLandUnit(e.target.value)}
+              className="px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="perches">Perches</option>
+              <option value="acres">Acres</option>
+            </select>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">Select the appropriate unit for the land size.</p>
         </div>
 
-        {/* Description */}
+        {/* Other Fields */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Description</label>
           <textarea
@@ -187,7 +193,7 @@ const ListLands = () => {
           />
         </div>
 
-        {/* Property Features */}
+        {/* Property Features Checkbox */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Property Features</label>
           <div className="flex flex-wrap py-4 px-4">
@@ -212,7 +218,7 @@ const ListLands = () => {
           </div>
         </div>
 
-        {/* Town */}
+        {/* Town, City, and Other Inputs */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Town</label>
           <input
@@ -223,7 +229,6 @@ const ListLands = () => {
           />
         </div>
 
-        {/* City */}
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">City</label>
           <input
@@ -260,37 +265,19 @@ const ListLands = () => {
 
         {/* Image Upload */}
         <div className="form-group">
-          <label className="block text-sm font-medium text-gray-700">Images (Optional)</label>
+          <label className="block text-sm font-medium text-gray-700">Upload Images</label>
           <input
             type="file"
-            accept="image/*"
             multiple
             onChange={handleImageChange}
-            className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="block w-full text-sm text-gray-500 file:py-2 file:px-4 file:border-0 file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
           />
         </div>
 
-        {/* Image Previews */}
-        <div className="form-group">
-          {imageFiles.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {imageFiles.map((file, index) => (
-                <img
-                  key={index}
-                  src={URL.createObjectURL(file)}
-                  alt={`Image preview ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-md"
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Submit Button */}
         <button
           type="submit"
+          className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={loading}
-          className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {loading ? "Listing..." : "List Land"}
         </button>
@@ -300,3 +287,4 @@ const ListLands = () => {
 };
 
 export default ListLands;
+

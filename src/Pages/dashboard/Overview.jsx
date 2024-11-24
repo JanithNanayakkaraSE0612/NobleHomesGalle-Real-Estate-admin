@@ -63,7 +63,7 @@ const Overview = () => {
             <div key={home.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 ease-in-out">
               <h3 className="text-2xl font-bold text-gray-800 mb-2">{home.title}</h3>
               <p className="text-gray-600 mb-2">{home.address}</p>
-              <p className="text-gray-800 mb-2">Price: ${home.price}</p>
+              <p className="text-gray-800 mb-2">Price: LKR{home.price}</p>
               <p className="text-gray-600 mb-2">Bedrooms: {home.bedrooms}</p>
               <p className="text-gray-600 mb-4">Bathrooms: {home.bathrooms}</p>
               <p className="text-gray-500 text-sm mb-4">{home.description}</p>
